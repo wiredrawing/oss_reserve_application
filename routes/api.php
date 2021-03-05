@@ -24,6 +24,33 @@ Route::group([
     "as" => "api.front.",
 ], function () {
 
+    // ゲスト情報
+    Route::group([
+        "prefix" => "guest",
+        "as" => "guest.",
+    ], function () {
+        // ゲスト情報登録用バリデーター
+        Route::post("/validate", [
+            "as" => "validate",
+            "uses" => "GuestController@validate",
+        ]);
+        // ゲスト情報新規登録
+        Route::post("/create", [
+            "as" => "create",
+            "uses" => "GuestController@create",
+        ]);
+        // 指定したゲスト情報を更新する
+        Route::post("/{guest_id}/update", [
+            "as" => "update",
+            "uses" => "GuestController@update",
+        ]);
+        // 指定したゲスト情報を取得
+        Route::post("/{guest_id}", [
+            "as" => "detail",
+            "uses" => "GuestController@detail",
+        ]);
+    });
+
     Route::group([
         "prefix" => "reserve",
         "as" => "reserve.",
@@ -32,6 +59,11 @@ Route::group([
         Route::get("/{reserve_id}/{from_datetime}/{to_datetime}", [
             "as" => "between",
             "uses" => "ReserveController@between",
+        ]);
+        // 指定したオブジェクトの予約情報を更新する
+        Route::post("/{reserve_id}/{token}", [
+            "as" => "update",
+            "uses" => "ReserveController@update",
         ]);
         // 指定したオブジェクトの予約情報を取得する
         Route::get("/{reserve_id}/{token}", [
@@ -42,6 +74,16 @@ Route::group([
         Route::get("/list", [
             "as" => "list",
             "uses" => "ReserveController@list",
+        ]);
+        // 予約登録処理
+        Route::post("/create", [
+            "as" => "create",
+            "uses" => "ReserveController@create",
+        ]);
+        // 予約送信前のバリデーション処理
+        Route::post("/validate", [
+            "as" => "validate",
+            "uses" => "ReserveController@validate",
         ]);
     });
 
