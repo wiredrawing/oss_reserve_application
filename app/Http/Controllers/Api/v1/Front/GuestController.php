@@ -23,27 +23,31 @@ class GuestController extends Controller
     {
         try {
             $post_data = $request->validated();
-                for($i = 0; $i < 111111111; $i++) {
-                // アクセス用のランダムトークンを生成
-                $token = RandomToken::MakeRandomToken(12);
-                $post_data["token"] = $token;
+            // アクセス用のランダムトークンを生成
+            $token = RandomToken::MakeRandomToken(12);
+            $post_data["token"] = $token;
 
-                // このランダムトークンと重複していないかをDBで調べる
-                $guest = Guest::where("token", $token)->get()->first();
+            // このランダムトークンと重複していないかをDBで調べる
+            $guest = Guest::where("token", $token)->get()->first();
 
-                // トークンの生成に失敗
-                if ($guest !== NULL) {
-                    throw new \Exception("セキュリティーキーの生成に失敗しました｡");
-                }
-                $guest = Guest::create($post_data);
+            // トークンの生成に失敗
+            if ($guest !== NULL) {
+                throw new \Exception("只今､サーバーが混み合っています｡時間をおいてアクセスして下さい｡");
             }
+            $guest = Guest::create($post_data);
 
-
-
-
-            return response()->json($guest);
+            // レスポンスを整形
+            $response = [
+                "status" => true,
+                "data" => $guest
+            ];
+            return response()->json($response);
         } catch (\Throwable $e) {
-            return response()->json([]);
+            $response = [
+                "status" => false,
+                "data" => $e,
+            ];
+            return response()->json($response);
         }
     }
 }

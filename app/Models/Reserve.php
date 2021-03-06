@@ -20,5 +20,7 @@ class Reserve extends Model
         "created_by",
         // 更新者
         "updated_by",
+        // 仮予約期間
+        "expired_at",
     ];
 }

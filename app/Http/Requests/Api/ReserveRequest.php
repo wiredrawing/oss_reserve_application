@@ -5,6 +5,8 @@ namespace App\Http\Requests\Api;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
 use App\Models\Guest;
 
 class ReserveRequest extends FormRequest
@@ -39,34 +41,61 @@ class ReserveRequest extends FormRequest
                     "room_id" => [
                         "required",
                         "integer",
-                        Rule::exists("rooms", "id"),
+                        // Rule::exists("rooms", "id"),
                     ],
                     "guest_id" => [
-                        "required",
+                        "nullable",
                         "integer",
-                        Rule::exists("guests", "id"),
+                        // Rule::exists("guests", "id"),
                     ],
                     "from_datetime" => [
                         "required",
                         "string",
-                        "date_format:Y-m-d H:i:s",
-                        function ($attribute, $value, $fail, $all) {
-                            $from = (\DateTime::createFromFormat("Y-m-d H:i:s", $value))->getTimestamp();
-                            $to = (\DateTime::createFromFormat("Y-m-d H:i:s", $this->input("to_datetime")))->getTimestamp();
-                            if ( ($from > $to) !== true) {
-                                $fail("正しい予約期間を指定して下さい｡");
+                        "date_format:Y-n-j H:i:s",
+                        function ($attribute, $value, $fail) {
+                            // 予約開始日時のバリデーション
+                            $from = \DateTime::createFromFormat("Y-n-j H:i:s", $value);
+                            if ($from === false) {
+                                $fail("予約日時のフォーマットが正しくありません｡");
+                                return false;
+                            }
+                            $from = $from->getTimestamp();
+
+                            // 予約終了日時のバリデーション
+                            $to = \DateTime::createFromFormat("Y-n-j H:i:s", $this->input("to_datetime"));
+                            if ($to === false) {
+                                $fail("予約日時のフォーマットが正しくありません｡");
+                                return false;
+                            }
+                            $to = $to->getTimestamp();
+                            if ( ($from < $to) !== true) {
+                                $fail("正しい予約期間を指定して下さい｡".__LINE__);
+                                return false;
                             }
                         }
                     ],
                     "to_datetime" => [
                         "required",
                         "string",
-                        "date_format:Y-m-d H:i:s",
-                        function ($attribute, $value, $fail, $all) {
-                            $from = (\DateTime::createFromFormat("Y-m-d H:i:s", $this->input("from_datetime")))->getTimestamp();
-                            $to = (\DateTime::createFromFormat("Y-m-d H:i:s", $value))->getTimestamp();
-                            if ( ($from > $to) !== true) {
+                        "date_format:Y-n-j H:i:s",
+                        function ($attribute, $value, $fail) {
+                            // 予約開始日時のバリデーション
+                            $to = \DateTime::createFromFormat("Y-n-j H:i:s", $value);
+                            if ($to === false) {
+                                $fail("予約日時のフォーマットが正しくありません｡");
+                                return false;
+                            }
+                            $to = $to->getTimestamp();
+                            // 予約終了日時のバリデーション
+                            $from = \DateTime::createFromFormat("Y-n-j H:i:s", $this->input("from_datetime"));
+                            if ($from === false) {
+                                $fail("予約日時のフォーマットが正しくありません｡");
+                                return false;
+                            }
+                            $from = $from->getTimestamp();
+                            if ( ($from < $to) !== true) {
                                 $fail("正しい予約期間を指定して下さい｡");
+                                return false;
                             }
                         }
                     ],
@@ -74,6 +103,12 @@ class ReserveRequest extends FormRequest
                         "nullable",
                         "string",
                         "between:0,1024",
+                    ],
+                    "user_token" => [
+                        "nullable",
+                        "string",
+                        // 仮押さえしたユーザーと同一かどうか
+                        Rule::exists("reserves", "user_token")
                     ]
                 ];
             }
@@ -105,5 +140,16 @@ class ReserveRequest extends FormRequest
         return [
 
         ];
+    }
+
+    //エラー時HTMLページにリダイレクトされないようにオーバーライド
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            response()->json(
+                $validator->errors(),
+                422
+            )
+        );
     }
 }

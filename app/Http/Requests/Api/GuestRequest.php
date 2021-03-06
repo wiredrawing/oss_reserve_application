@@ -64,7 +64,7 @@ class GuestRequest extends FormRequest
                         "email:rfc",
                     ],
                     "password" => [
-                        "required",
+                        "nullable",
                         "string",
                         "between:10,72"
                     ],
