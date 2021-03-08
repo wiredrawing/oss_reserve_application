@@ -38,14 +38,14 @@ class ReserveController extends Controller
                     ->where("is_canceled", Config("const.binary_type.off"))
                     ->where("from_datetime", "<=", $post_data["from_datetime"])
                     ->where("to_datetime", ">", $post_data["from_datetime"]);
+                })
+                ->orWhere(function($query) use ($post_data) {
+                   // 予約希望の終了日時日時を含むレコード
+                   $query
+                   ->where("is_canceled", Config("const.binary_type.off"))
+                   ->where("from_datetime", ">=", $post_data["from_datetime"])
+                   ->where("from_datetime", "<", $post_data["to_datetime"]);
                 });
-                // ->orWhere(function($query) use ($post_data) {
-                //    // 予約希望の終了日時日時を含むレコード
-                //    $query
-                //    ->where("is_canceled", Config("const.binary_type.off"))
-                //    ->where("from_datetime", ">=", $post_data["from_datetime"])
-                //    ->where("from_datetime", "<", $post_data["to_datetime"]);
-                // });
             })
             ->get();
 

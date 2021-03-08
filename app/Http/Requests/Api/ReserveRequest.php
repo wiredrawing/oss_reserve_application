@@ -226,7 +226,7 @@ class ReserveRequest extends FormRequest
                             ->get()
                             ->first();
 
-                            // トークンの参照チェック
+                            // トークンと予約IDがマッチしているかどうか
                             if ($reserve === NULL) {
                                 $fail("指定した予約情報を更新できません｡");
                             }
@@ -242,6 +242,8 @@ class ReserveRequest extends FormRequest
                             ->where("user_token", $value)
                             ->get()
                             ->first();
+
+                            // トークンと予約IDがマッチしているかどうか
                             if ($reserve === NULL) {
                                 $fail("指定した予約情報を更新できません｡");
                             }
