@@ -22,5 +22,7 @@ class Reserve extends Model
         "updated_by",
         // 仮予約期間
         "expired_at",
+        // ユーザーの編集画面表示用
+        "user_token",
     ];
 }
