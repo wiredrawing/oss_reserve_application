@@ -39,7 +39,7 @@ class ReserveRequest extends FormRequest
 
                 // 共有ルール
                 $rules = [
-                    "room_id" => [
+                    "service_id" => [
                         "required",
                         "integer",
                         // Rule::exists("rooms", "id"),
@@ -130,7 +130,7 @@ class ReserveRequest extends FormRequest
                             }
                         }
                     ],
-                    "room_id" => [
+                    "service_id" => [
                         "required",
                         "integer",
                         // Rule::exists("rooms", "id"),
@@ -220,35 +220,35 @@ class ReserveRequest extends FormRequest
                         "required",
                         "integer",
                         Rule::exists("reserves", "id"),
-                        function ($attribute, $value, $fail) {
-                            $reserve = Reserve::where("id", $value)
-                            ->where("user_token", $this->route()->parameter("user_token"))
-                            ->get()
-                            ->first();
+                        // function ($attribute, $value, $fail) {
+                        //     $reserve = Reserve::where("id", $value)
+                        //     ->where("user_token", $this->route()->parameter("user_token"))
+                        //     ->get()
+                        //     ->first();
 
-                            // トークンと予約IDがマッチしているかどうか
-                            if ($reserve === NULL) {
-                                $fail("指定した予約情報を更新できません｡");
-                            }
-                        }
+                        //     // トークンと予約IDがマッチしているかどうか
+                        //     if ($reserve === NULL) {
+                        //         $fail("指定した予約情報を更新できません｡");
+                        //     }
+                        // }
                     ],
-                    "user_token" => [
-                        "required",
-                        "string",
-                        // 仮押さえしたユーザーと同一かどうか
-                        Rule::exists("reserves", "user_token"),
-                        function ($attribute, $value, $fail) {
-                            $reserve = Reserve::where("id", $this->route()->parameter("reserve_id"))
-                            ->where("user_token", $value)
-                            ->get()
-                            ->first();
+                    // "user_token" => [
+                    //     "required",
+                    //     "string",
+                    //     // 仮押さえしたユーザーと同一かどうか
+                    //     Rule::exists("reserves", "user_token"),
+                    //     function ($attribute, $value, $fail) {
+                    //         $reserve = Reserve::where("id", $this->route()->parameter("reserve_id"))
+                    //         ->where("user_token", $value)
+                    //         ->get()
+                    //         ->first();
 
-                            // トークンと予約IDがマッチしているかどうか
-                            if ($reserve === NULL) {
-                                $fail("指定した予約情報を更新できません｡");
-                            }
-                        }
-                    ]
+                    //         // トークンと予約IDがマッチしているかどうか
+                    //         if ($reserve === NULL) {
+                    //             $fail("指定した予約情報を更新できません｡");
+                    //         }
+                    //     }
+                    // ]
                 ];
             }
         }

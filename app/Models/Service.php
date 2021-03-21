@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Room extends Model
+class Service extends Model
 {
 
 
     protected $fillable = [
-        "room_name",
+        "service_name",
+        "service_type",
         "owner_name",
         "capacity",
         "price",
@@ -20,4 +21,10 @@ class Room extends Model
         // 更新者
         "updated_by",
     ];
+
+
+    public function reserves()
+    {
+        return $this->hasMany(Reserve::class, "service_id");
+    }
 }

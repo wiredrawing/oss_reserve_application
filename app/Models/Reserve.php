@@ -12,7 +12,7 @@ class Reserve extends Model
     protected $fillable = [
         "from_datetime",
         "to_datetime",
-        "room_id",
+        "service_id",
         "guest_id",
         "memo",
         "is_canceled",
@@ -25,4 +25,10 @@ class Reserve extends Model
         // ユーザーの編集画面表示用
         "user_token",
     ];
+
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class, "service_id");
+    }
 }

@@ -16,7 +16,7 @@ class CreateReservesTable extends Migration
         Schema::create('reserves', function (Blueprint $table) {
             $table->id();
             // 予約対象
-            $table->bigInteger("room_id");
+            $table->bigInteger("service_id");
             // 使用開始予定日
             $table->dateTime("from_datetime");
             // 使用終了日

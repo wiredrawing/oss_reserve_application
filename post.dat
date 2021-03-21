@@ -1,0 +1,1 @@
+curl -X POST -H "Content-Type: application/json" -d '{"service_id": "1", "from_datetime": "2021-5-10 16:15:00", "to_datetime": "2021-5-10 16:30:00", "guest_id": 2 }' 10.10.170.26:8000/api/v1/front/reserve/create

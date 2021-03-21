@@ -60,12 +60,12 @@ Route::group([
             "as" => "between",
             "uses" => "ReserveController@between",
         ]);
-        // 指定したオブジェクトの予約情報を更新する
+        // 指定したサービスの予約情報を更新する
         Route::post("/{reserve_id}/{user_token}/update", [
             "as" => "update",
             "uses" => "ReserveController@update",
         ]);
-        // 指定したオブジェクトの予約情報を取得する
+        // 指定したサービスの予約情報を取得する
         Route::get("/{reserve_id}/{user_token}", [
             "as" => "detail",
             "uses" => "ReserveController@detail",
@@ -88,18 +88,22 @@ Route::group([
     });
 
     Route::group([
-        "prefix" => "room",
-        "as" => "room.",
+        "prefix" => "service",
+        "as" => "service.",
     ], function () {
-        // 指定したroom_idのアクセス日時以降の予約状況を取得する
-        Route::get("/{room_id}", [
+        Route::get("/schedule/{service_id}/detail", [
             "as" => "detail",
-            "uses" => "RoomController@detail",
+            "uses" => "ServiceController@detail",
         ]);
-        // 現在予約可能な全オブジェクトを取得
-        Route::get("/list", [
-            "as" => "list",
-            "uses" => "RoomController@list",
+        // 指定したroom_idのアクセス日時以降の予約状況を取得する
+        Route::get("/schedule/{service_id}", [
+            "as" => "schedule",
+            "uses" => "ServiceController@schedule",
+        ]);
+        // ダブルブッキングチェック
+        Route::get("/duplication_check/{service_id}/{reserve_id}", [
+            "as" => "duplication_check",
+            "uses" => "ServiceController@duplication_check",
         ]);
     });
 });
