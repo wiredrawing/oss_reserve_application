@@ -14,6 +14,7 @@ class Service extends Model
         "owner_name",
         "capacity",
         "price",
+        "price_per_hour",
         "is_displayed",
         "is_deleted",
         // 作成者

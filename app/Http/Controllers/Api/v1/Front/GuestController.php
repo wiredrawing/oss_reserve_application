@@ -24,8 +24,7 @@ class GuestController extends Controller
         try {
             $post_data = $request->validated();
             // アクセス用のランダムトークンを生成
-            $token = RandomToken::MakeRandomToken(12);
-            $post_data["token"] = $token;
+            $token = RandomToken::MakeRandomToken(32);
 
             // このランダムトークンと重複していないかをDBで調べる
             $guest = Guest::where("token", $token)->get()->first();
@@ -34,6 +33,8 @@ class GuestController extends Controller
             if ($guest !== NULL) {
                 throw new \Exception("只今､サーバーが混み合っています｡時間をおいてアクセスして下さい｡");
             }
+
+            $post_data["token"] = $token;
             $guest = Guest::create($post_data);
 
             // レスポンスを整形

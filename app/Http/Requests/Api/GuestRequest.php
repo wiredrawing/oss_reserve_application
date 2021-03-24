@@ -34,9 +34,7 @@ class GuestRequest extends FormRequest
         if ($method === "POST") {
 
 
-            if ($route_name === "api.front.guest.create" || $route_name === "api.front.guest.validate") {
-
-
+            if ($route_name === "api.front.guest.create") {
                 $rules = [
                     "family_name" => [
                         "required",
@@ -62,6 +60,12 @@ class GuestRequest extends FormRequest
                         "required",
                         "string",
                         "email:rfc",
+                        function ($attribute, $value, $fail) {
+                            $guest = Guest::where("email", $value)->get()->first();
+                            if ($guest !== NULL) {
+                                $fail(":attributeは既に､利用中です｡");
+                            }
+                        }
                     ],
                     "password" => [
                         "nullable",

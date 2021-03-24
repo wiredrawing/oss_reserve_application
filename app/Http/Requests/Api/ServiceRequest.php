@@ -34,10 +34,102 @@ class ServiceRequest extends FormRequest
 
         if ($method === "POST") {
 
+            // 新規サービス登録
+            if ($route_name === "api.front.service.create") {
+                $rules = [
+                    "owner_id" => [
+                        "nullable",
+                    ],
+                    "service_name" => [
+                        "required",
+                        "string",
+                        "between:1,512"
+                    ],
+                    "memo" => [
+                        "nullable",
+                        "string",
+                        "between:0,10240"
+                    ],
+                    // 当該のサービスが収容できる人数
+                    "capacity" => [
+                        "required",
+                        "integer",
+                        "min:1",
+                    ],
+                    // 統一価格
+                    "price" => [
+                        "required",
+                        "integer",
+                    ],
+                    // 時間単価(時給)
+                    "price_per_hour" => [
+                        "required",
+                        "integer",
+                    ],
+                    "service_type" => [
+                        "required",
+                        "integer",
+                    ]
+                ];
+            } else if ($route_name === "api.front.service.update") {
+                $rules = [
+                    "service_id" => [
+                        "required",
+                        "integer",
+                        // 生存中サービスのみ
+                        Rule::exists("services", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type.off"));
+                        }),
+                    ],
+                    "owner_id" => [
+                        "nullable",
+                    ],
+                    "service_name" => [
+                        "required",
+                        "string",
+                        "between:1,512"
+                    ],
+                    "memo" => [
+                        "nullable",
+                        "string",
+                        "between:0,10240"
+                    ],
+                    // 当該のサービスが収容できる人数
+                    "capacity" => [
+                        "required",
+                        "integer",
+                        "min:1",
+                    ],
+                    // 統一価格
+                    "price" => [
+                        "required",
+                        "integer",
+                    ],
+                    // 時間単価(時給)
+                    "price_per_hour" => [
+                        "required",
+                        "integer",
+                    ],
+                    "service_type" => [
+                        "required",
+                        "integer",
+                    ]
+                ];
+            }
         } else if ($method === "GET") {
 
             if ($route_name === "api.front.service.detail") {
-
+                // 指定したservice_idに紐づくサービス情報を取得する
+                $rules = [
+                    "service_id" => [
+                        "required",
+                        "integer",
+                        // 生存中サービスのみ
+                        Rule::exists("services", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type.off"));
+                        }),
+                    ],
+                ];
             } else if ($route_name === "api.front.service.schedule") {
                 $rules = [
                     "service_id" => [
@@ -65,6 +157,9 @@ class ServiceRequest extends FormRequest
                         }),
                     ]
                 ];
+            } else if ($route_name === "api.front.service.list") {
+                // 予約可能なサービス一覧を取得する
+                $rules = [];
             }
         } else {
             $rules = [];

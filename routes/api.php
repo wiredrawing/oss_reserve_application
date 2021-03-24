@@ -91,6 +91,21 @@ Route::group([
         "prefix" => "service",
         "as" => "service.",
     ], function () {
+        // 新規サービス情報の登録
+        Route::post("/create", [
+            "as" => "create",
+            "uses" => "ServiceController@create"
+        ]);
+        // 既存サービスの更新処理
+        Route::post("/update/{service_id}", [
+            "as" => "update",
+            "uses" => "ServiceController@update"
+        ]);
+        // 現在登録中の利用可能なサービス
+        Route::get("/list", [
+            "as" => "list",
+            "uses" => "ServiceController@list"
+        ]);
         Route::get("/schedule/{service_id}/detail", [
             "as" => "detail",
             "uses" => "ServiceController@detail",

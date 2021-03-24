@@ -13,7 +13,106 @@ class ServiceController extends Controller
 {
 
 
+    /**
+     * 新規サービスの登録処理
+     *
+     * @param ServiceRequest $request
+     * @return void
+     */
+    public function create (ServiceRequest $request)
+    {
+        try {
+            $post_data = $request->validated();
 
+            // 新規サービス登録
+            $service = Service::create($post_data);
+
+            $response = [
+                "status" => true,
+                "data" => $service,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
+
+
+    /**
+     * 指定したサービス情報の更新処理
+     *
+     * @param ServiceRequest $request
+     * @param integer $service_id
+     * @return void
+     */
+    public function update (ServiceRequest $request, int $service_id)
+    {
+        try {
+            $post_data = $request->validated();
+
+            // 更新対象のレコード取得
+            $service = Service::find($service_id);
+            var_dump("更新前");
+            print_r($service->toArray());
+            // レコードの更新処理
+            $result = $service->fill($post_data)->save();
+            var_dump("更新あと");
+            print_r($service->toArray());
+            // SQLクエリの成功可否
+            if ($result !== true) {
+                throw new \Exception("指定したサービス情報のアップデートに失敗しました｡");
+            }
+
+            $response = [
+                "status" => true,
+                "data" => $service,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
+
+
+    /**
+     * 現在予約可能なサービス一覧を取得する
+     *
+     * @param ServiceRequest $request
+     * @return void
+     */
+    public function list(ServiceRequest $request)
+    {
+        try {
+            $services = Service::where([
+                "is_displayed" => Config("const.binary_type.on"),
+                "is_deleted" => Config("const.binary_type.off"),
+            ])
+            ->get();
+            $response = [
+                "status" => true,
+                "data" => $services,
+            ];
+            // 現在､予約可能なサービス一覧を表示
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
 
     /**
      * 指定したサービスの全予約状況を取得する
@@ -25,7 +124,9 @@ class ServiceController extends Controller
     public function schedule(ServiceRequest $request, int $service_id)
     {
         try {
-            $validated_data = $request->validated();
+            $get_data = $request->validated();
+            logger()->info($get_data);
+
             $service = Service::with([
                 "reserves" => function ($query) {
                     $query
@@ -36,7 +137,7 @@ class ServiceController extends Controller
                     ->orderBy("to_datetime", "asc");
                 }
             ])
-            ->find($validated_data["service_id"]);
+            ->find($service_id);
 
             $response = [
                 "status" => true,
@@ -65,7 +166,7 @@ class ServiceController extends Controller
     public function duplication_check(ServiceRequest $request, int $service_id, int $reserve_id)
     {
         try {
-            $validated_data = $request->validated();
+            $get_data = $request->validated();
             // 対象の予約情報を取得
             $reservation = Reserve::where("service_id", $service_id)
             ->where("is_confirmed", Config("const.binary_type.on"))
@@ -80,8 +181,8 @@ class ServiceController extends Controller
             }
 
             // 以下指定した時間帯での重複ブッキングを検出する
-            $duplicated_reservation = Reserve::where("service_id", $validated_data["service_id"])
-            ->where("id", "!=", $validated_data["reserve_id"])
+            $duplicated_reservation = Reserve::where("service_id", $get_data["service_id"])
+            ->where("id", "!=", $get_data["reserve_id"])
             ->where("is_confirmed", Config("const.binary_type.on"))
             ->where("is_canceled", Config("const.binary_type.off"))
             ->where("from_datetime", "<=", $reservation->to_datetime)

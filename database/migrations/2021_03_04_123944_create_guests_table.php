@@ -23,7 +23,7 @@ class CreateGuestsTable extends Migration
             $table->string("given_name_sort", 512);
             $table->string("email", 512);
             $table->string("phone_number", 512);
-            $table->string("token", 2048);
+            $table->string("token", 512);
             // ユーザー側の使う備考欄
             $table->text("option")->nullable();
             // 管理側が使う備考欄
@@ -35,6 +35,9 @@ class CreateGuestsTable extends Migration
             // 情報更新者
             $table->integer("update_by")->nullable();
             $table->timestamps();
+
+            $table->unique("token");
+            $table->unique("email");
         });
     }
 
