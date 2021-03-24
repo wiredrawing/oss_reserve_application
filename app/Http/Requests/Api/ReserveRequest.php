@@ -122,18 +122,21 @@ class ReserveRequest extends FormRequest
                         Rule::exists("reserves", "id"),
                         function ($attribute, $value, $fail) {
                             $reserve = Reserve::where("id", $value)
+                            // セキュリティトークンがマッチすること
                             ->where("user_token", $this->route()->parameter("user_token"))
+                            // レンタルサービスIDがマッチしていること
+                            ->where("service_id", $this->input("service_id"))
                             ->get()
                             ->first();
                             if ($reserve === NULL) {
-                                $fail("指定した予約情報を更新できません｡");
+                                $fail("指定した予約情報が見つかりませんでした｡");
                             }
                         }
                     ],
                     "service_id" => [
                         "required",
                         "integer",
-                        // Rule::exists("rooms", "id"),
+                        // Rule::exists("services", "id"),
                     ],
                     "guest_id" => [
                         "nullable",

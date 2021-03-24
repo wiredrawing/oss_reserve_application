@@ -35,6 +35,7 @@ class CreateReservesTable extends Migration
 
             // 仮押さえ中のユーザーを識別するためのトークン｡予約確定後はNULLに
             $table->string("user_token", 512)->nullable();
+
             $table->timestamps();
 
             // ユニークキー

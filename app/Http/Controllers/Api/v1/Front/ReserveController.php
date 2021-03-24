@@ -22,71 +22,15 @@ class ReserveController extends Controller
     public function create (ReserveRequest $request)
     {
         try {
-            // DB::enableQueryLog();
-            // トランザクションの開始
-            DB::beginTransaction();
+            // 新規予約レコードを取得する
+            $reservation = Reserve::makeNewReservation($request);
 
-            // postデータの取得
-            $post_data = $request->validated();
-
-            // リクエストされたスケジュールとの重複検証
-            $reserve = Reserve::where("service_id", $post_data["service_id"])
-            ->where("is_canceled", Config("const.binary_type.off"))
-            ->where(function ($query) use ($post_data) {
-                $query
-                ->where("from_datetime", "<=", $post_data["to_datetime"])
-                ->where("to_datetime", ">", $post_data["from_datetime"]);
-            })
-            ->get();
-
-            print_r($reserve->toArray());
-            // 該当の期間に他の予約と重複する場合
-            if ($reserve->count() > 0) {
-                throw new \Exception("リクエストされたスケジュールは既に予約が入っています｡");
-            }
-
-            // エンドユーザーの編集用トークン
-            $random_token = RandomToken::MakeRandomToken(64);
-            $temp = Reserve::where("user_token", $random_token)->get()->first();
-            if ($temp !== NULL) {
-                throw new \Exception("只今サーバーが混み合っています｡もう一度､送信して下さい｡");
-            }
-
-            $post_data["expired_at"] = date("Y-m-d H:i:s", time() + 60 * 30);
-            $post_data["user_token"] = $random_token;
-            // DBへの予約レコード問い合わせ
-            $reservation = Reserve::create($post_data);
-
-            // スケジュールが重複して登録されていないかを検証
-            $last_insert_id = $reservation->id;
-            $check_reservation = Reserve::where("service_id", $post_data["service_id"])
-            ->where("id", "!=", $last_insert_id)
-            ->where("is_canceled", Config("const.binary_type.off"))
-            ->where(function ($query) use ($post_data) {
-                // 予約希望の開始日時を含むレコード
-                $query
-                ->where("from_datetime", "<=", $post_data["to_datetime"])
-                ->where("to_datetime", ">", $post_data["from_datetime"]);
-            })
-            ->get();
-
-            if ($check_reservation->count() > 0) {
-                throw new \Exception("予約の確保ができませんでした｡別のスケジュールを指定して下さい｡");
-            }
-
-            // DBのコミット
-            DB::commit();
-
-            // // dumpする
-            // dd(DB::getQueryLog());
             $response = [
                 "status" => true,
                 "data" => $reservation,
             ];
             return response()->json($response);
         } catch (\Throwable $e) {
-            // DBのロールバック
-            DB::rollback();
             $response = [
                 "status" => false,
                 "data" => $e->getMessage(),
@@ -106,54 +50,57 @@ class ReserveController extends Controller
     public function update(ReserveRequest $request, int $reserve_id, string $token = "")
     {
         try {
-            // トランザクション開始
-            DB::beginTransaction();
-            $post_data = $request->validated();
+            $updated_reservation = Reserve::updateExistingReservation($request);
+            // // トランザクション開始
+            // DB::beginTransaction();
+            // $post_data = $request->validated();
 
 
-            $reservation = Reserve::where("service_id", $post_data["service_id"])
-            ->where("id", "!=", $post_data["reserve_id"])
-            ->where("is_canceled", Config("const.binary_type.off"))
-            ->where(function ($query) use ($post_data) {
-                $query
-                ->where("from_datetime", "<=", $post_data["to_datetime"])
-                ->where("to_datetime", ">"< $post_data["from_datetime"]);
-            })
-            ->get();
-            // print_r($reservation->toArray());
-            if ($reservation->count() > 0) {
-                throw new \Exception("リクエストされたスケジュールは既に予約が入っています｡".__LINE__);
-            }
+            // $reservation = Reserve::where("service_id", $post_data["service_id"])
+            // ->where("id", "<", $post_data["reserve_id"])
+            // ->where("is_confirmed", Config("const.binary_type.on"))
+            // ->where("is_canceled", Config("const.binary_type.off"))
+            // ->where(function ($query) use ($post_data) {
+            //     $query
+            //     ->where("from_datetime", "<=", $post_data["to_datetime"])
+            //     ->where("to_datetime", ">"< $post_data["from_datetime"]);
+            // })
+            // ->get();
+            // // print_r($reservation->toArray());
+            // if ($reservation->count() > 0) {
+            //     throw new \Exception("リクエストされたスケジュールは既に予約が入っています｡".__LINE__);
+            // }
 
-            // 既存の予約情報
-            $reservation = Reserve::find($post_data["reserve_id"]);
-            $result = $reservation->fill($post_data)->save();
+            // // 既存の予約情報
+            // $reservation = Reserve::find($post_data["reserve_id"]);
+            // $result = $reservation->fill($post_data)->save();
 
-            // スケジュールの更新に失敗
-            if ($result !== true) {
-                throw new \Exception("リクエストされたスケジュールの更新に失敗しました｡".__LINE__);
-            }
+            // // スケジュールの更新に失敗
+            // if ($result !== true) {
+            //     throw new \Exception("リクエストされたスケジュールの更新に失敗しました｡".__LINE__);
+            // }
 
 
 
-            $check_reservation = Reserve::where("service_id", $post_data["service_id"])
-            ->where("id", "!=", $post_data["reserve_id"])
-            ->where("is_canceled", Config("const.binary_type.off"))
-            ->where(function ($query) use ($post_data) {
-                $query
-                ->where("from_datetime", "<=", $post_data["to_datetime"])
-                ->where("to_datetime", ">"< $post_data["from_datetime"]);
-            })
-            ->get();
-            // print_r($check_reservation->toArray());
-            if ($check_reservation->count() > 0) {
-                throw new \Exception("スケジュールの更新に失敗しました｡".__LINE__);
-            }
+            // $check_reservation = Reserve::where("service_id", $post_data["service_id"])
+            // ->where("id", "<", $post_data["reserve_id"])
+            // ->where("is_confirmed", Config("const.binary_type.on"))
+            // ->where("is_canceled", Config("const.binary_type.off"))
+            // ->where(function ($query) use ($post_data) {
+            //     $query
+            //     ->where("from_datetime", "<=", $post_data["to_datetime"])
+            //     ->where("to_datetime", ">"< $post_data["from_datetime"]);
+            // })
+            // ->get();
+            // // print_r($check_reservation->toArray());
+            // if ($check_reservation->count() > 0) {
+            //     throw new \Exception("スケジュールの更新に失敗しました｡".__LINE__);
+            // }
 
-            DB::commit();
+            // DB::commit();
             $response = [
                 "status" => true,
-                "data" => $reservation,
+                "data" => $updated_reservation,
             ];
             return response()->json($response);
         } catch (\Throwable $e) {
@@ -185,6 +132,7 @@ class ReserveController extends Controller
             $reservation = Reserve::with([
                 "service",
             ])
+            ->where("is_confirmed", Config("const.binary_type.on"))
             ->find($validated_data["reserve_id"]);
 
             if ($reservation === NULL) {

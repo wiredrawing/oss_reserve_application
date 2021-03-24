@@ -28,7 +28,12 @@ class ServiceController extends Controller
             $validated_data = $request->validated();
             $service = Service::with([
                 "reserves" => function ($query) {
-                    $query->orderBy("to_datetime", "asc");
+                    $query
+                    ->where("is_confirmed", Config("const.binary_type.on"))
+                    ->where("is_canceled", Config("const.binary_type.off"))
+                    // リクエスト日時移行のスケジュールを取得
+                    ->where("to_datetime", ">=", date("Y-m-d H:i:s"))
+                    ->orderBy("to_datetime", "asc");
                 }
             ])
             ->find($validated_data["service_id"]);
@@ -39,6 +44,7 @@ class ServiceController extends Controller
             ];
             return response()->json($response);
         } catch (\Throwable $e) {
+            logger()->error($e);
             $response = [
                 "status" => false,
                 "data" => $e->getMessage(),
@@ -52,8 +58,8 @@ class ServiceController extends Controller
      * 指定したサービスの指定した時間帯でのダブルブッキングチェック
      *
      * @param ServiceRequest $request
-     * @param integer $service_id 商品ID
-     * @param integer $reserve_id 予約ID
+     * @param integer $service_id
+     * @param integer $reserve_id
      * @return void
      */
     public function duplication_check(ServiceRequest $request, int $service_id, int $reserve_id)
@@ -61,30 +67,30 @@ class ServiceController extends Controller
         try {
             $validated_data = $request->validated();
             // 対象の予約情報を取得
-            $reservation = Reserve::where("service_id", $validated_data["service_id"])
+            $reservation = Reserve::where("service_id", $service_id)
+            ->where("is_confirmed", Config("const.binary_type.on"))
+            ->where("is_canceled", Config("const.binary_type.off"))
             ->with([
                 "service",
             ])
-            ->find($validated_data["reserve_id"]);
+            ->find($reserve_id);
 
             if ($reservation === NULL) {
                 throw new \Exception("指定した予約情報が見つかりません｡");
             }
 
             // 以下指定した時間帯での重複ブッキングを検出する
-            $check_reservation = Reserve::where("service_id", $validated_data["service_id"])
+            $duplicated_reservation = Reserve::where("service_id", $validated_data["service_id"])
             ->where("id", "!=", $validated_data["reserve_id"])
+            ->where("is_confirmed", Config("const.binary_type.on"))
             ->where("is_canceled", Config("const.binary_type.off"))
-            ->where(function ($query) use ($reservation) {
-                $query
-                ->where("from_datetime", "<=", $reservation->to_datetime)
-                ->where("to_datetime", ">", $reservation->from_datetime);
-            })
+            ->where("from_datetime", "<=", $reservation->to_datetime)
+            ->where("to_datetime", ">", $reservation->from_datetime)
             ->get();
 
             $response = [
                 "status" => true,
-                "data" => $check_reservation,
+                "data" => $duplicated_reservation,
             ];
             return response()->json($response);
         } catch (\Throwable $e) {

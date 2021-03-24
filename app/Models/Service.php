@@ -22,7 +22,6 @@ class Service extends Model
         "updated_by",
     ];
 
-
     public function reserves()
     {
         return $this->hasMany(Reserve::class, "service_id");

@@ -60,7 +60,9 @@ class ServiceRequest extends FormRequest
                     "reserve_id" => [
                         "required",
                         "integer",
-                        Rule::exists("reserves", "id"),
+                        Rule::exists("reserves", "id")->where(function ($query) {
+                            $query->where("service_id", $this->route()->parameter("service_id"));
+                        }),
                     ]
                 ];
             }
