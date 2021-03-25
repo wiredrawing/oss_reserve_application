@@ -50,7 +50,7 @@ class ReserveController extends Controller
     public function update(ReserveRequest $request, int $reserve_id, string $token = "")
     {
         try {
-            $updated_reservation = Reserve::updateExistingReservation($request);
+            $updated_reservation = Reserve::updateExistingReservation($request, $reserve_id);
             // DB::commit();
             $response = [
                 "status" => true,

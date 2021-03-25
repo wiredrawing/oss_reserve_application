@@ -6,7 +6,6 @@ use App\Http\Requests\Api\ReserveRequest;
 use App\Libraries\RandomToken;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use League\Flysystem\Adapter\NullAdapter;
 
 class Reserve extends Model
 {
@@ -59,15 +58,19 @@ class Reserve extends Model
     /**
      * 指定した条件で新規スケジュールを取得する
      *
+     *
      * @param ReserveRequest $request
-     * @param boolean $is_update
+     * @param integer $old_reserve_id
      * @return void
      */
-    public static function makeNewReservation(ReserveRequest $request)
+    public static function makeNewReservation(ReserveRequest $request, int $old_reserve_id = NULL)
     {
         try {
             // DB::enableQueryLog();
             DB::beginTransaction();
+
+            // 当該トランザクションでのシーケンスを保持
+            $last_insert_id = 0;
 
             // postデータの取得
             $post_data = $request->validated();
@@ -78,9 +81,17 @@ class Reserve extends Model
             ->where("is_canceled", Config("const.binary_type.off"))
             // 以下予約不可能な条件
             ->where("from_datetime", "<=", $post_data["to_datetime"])
-            ->where("to_datetime", ">", $post_data["from_datetime"])
-            ->get()
-            ->first();
+            ->where("to_datetime", ">", $post_data["from_datetime"]);
+
+            // 予約スケジュールのアップデートが目的の場合
+            if ($old_reserve_id !== NULL) {
+                $reserve = $reserve->where("id", "!=", $old_reserve_id);
+            }
+
+            $reserve = $reserve->get()->first();
+
+            // sqlの実行ログ
+            // logger()->debug(dd($reserve->toSql(), $reserve->getBindings()));
 
             // 該当の期間に他の予約と重複する場合
             if ($reserve !== NULL) {
@@ -89,9 +100,7 @@ class Reserve extends Model
 
             // エンドユーザーの編集用トークン
             $random_token = RandomToken::MakeRandomToken(64);
-            $temp = Reserve::where("user_token", $random_token)
-            ->get()
-            ->first();
+            $temp = Reserve::where("user_token", $random_token)->get()->first();
             if ($temp !== NULL) {
                 throw new \Exception("只今サーバーが混み合っています｡もう一度､送信して下さい｡");
             }
@@ -109,10 +118,16 @@ class Reserve extends Model
             ->where("is_canceled", Config("const.binary_type.on"))
             ->where("is_canceled", Config("const.binary_type.off"))
             ->where("from_datetime", "<=", $post_data["to_datetime"])
-            ->where("to_datetime", ">", $post_data["from_datetime"])
-            ->get();
+            ->where("to_datetime", ">", $post_data["from_datetime"]);
 
-            if ($check_reservation->count() > 0) {
+            // アップデートの場合
+            if ($old_reserve_id > 0) {
+                $check_reservation = $check_reservation->where("id", "!=", $old_reserve_id);
+            }
+
+            $check_reservation = $check_reservation->get()->first();
+
+            if ($check_reservation !== NULL) {
                 throw new \Exception("予約の確保ができませんでした｡別のスケジュールを指定して下さい｡");
             }
 
@@ -128,10 +143,11 @@ class Reserve extends Model
             ->where("is_canceled", Config("const.binary_type.off"))
             ->where("from_datetime", "<=", $post_data["to_datetime"])
             ->where("to_datetime", ">", $post_data["from_datetime"])
-            ->get();
+            ->get()
+            ->first();
 
             // 重複レコードのチェック
-            if ($reservation->count() > 0) {
+            if ($reservation !== NULL) {
                 // 自身より先に､同じ時間帯で予約をしているレコードがある場合は削除する
                 Reserve::find($last_insert_id)->deleted();
                 throw new \Exception("予約の確保ができませんでした｡別のスケジュールを指定して下さい｡");
@@ -161,23 +177,28 @@ class Reserve extends Model
      * 既存予約スケジュールのアップデート処理を行う
      *
      * @param ReserveRequest $request
+     * @param integer $reserve_id
      * @return void
      */
-    public static function updateExistingReservation(ReserveRequest $request)
+    public static function updateExistingReservation(ReserveRequest $request, int $reserve_id)
     {
         try {
             // トランザクション開始
             DB::beginTransaction();
+
             $post_data = $request->validated();
 
             $reservation = Reserve::where("service_id", $post_data["service_id"])
-            ->where("id", "!=", $post_data["reserve_id"])
+            ->where("id", "!=", $reserve_id)
             ->where("is_confirmed", Config("const.binary_type.on"))
             ->where("is_canceled", Config("const.binary_type.off"))
             ->where("from_datetime", "<=", $post_data["to_datetime"])
-            ->where("to_datetime", ">"< $post_data["from_datetime"])
-            ->get()
-            ->first();
+            ->where("to_datetime", ">", $post_data["from_datetime"]);
+
+            // sqlの実行ログ
+            logger()->debug(dd($reservation->toSql(), $reservation->getBindings()));
+
+            $reservation = $reservation->get()->first();
 
             // print_r($reservation->toArray());
             if ($reservation !== NULL) {
@@ -185,7 +206,7 @@ class Reserve extends Model
             }
 
             // 既存の予約情報を未確定状態にする
-            $reservation = Reserve::find($post_data["reserve_id"]);
+            $reservation = Reserve::find($reserve_id);
             $result = $reservation->fill([
                 "is_confirmed" => Config("const.binary_type.off"),
             ])->save();

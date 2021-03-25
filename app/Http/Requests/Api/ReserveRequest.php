@@ -56,6 +56,14 @@ class ReserveRequest extends FormRequest
                     "guest_id" => [
                         "nullable",
                         "integer",
+                        function ($attribute, $value, $fail) {
+                            $guest = Guest::where("is_displayed", Config("const.binary_type.on"))
+                            ->where("is_deleted", Config("const.binary_type.off"))
+                            ->find($value);
+                            if ($guest === NULL) {
+                                $fail("指定した:attributeが見つかりません｡");
+                            }
+                        }
                         // Rule::exists("guests", "id"),
                     ],
                     "from_datetime" => [
