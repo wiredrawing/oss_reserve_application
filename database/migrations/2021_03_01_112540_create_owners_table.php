@@ -17,6 +17,10 @@ class CreateOwnersTable extends Migration
             $table->id();
             // 所有者名
             $table->string("owner_name", 512);
+            // 所有者名(ふりがな)
+            $table->string("owner_name_sort", 512);
+            // オーナーのメールアドレス
+            $table->string("email", 512)->nullable();
             $table->timestamps();
         });
     }

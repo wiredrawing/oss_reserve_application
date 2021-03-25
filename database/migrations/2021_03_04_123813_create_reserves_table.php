@@ -16,13 +16,17 @@ class CreateReservesTable extends Migration
         Schema::create('reserves', function (Blueprint $table) {
             $table->id();
             // 予約対象
-            $table->bigInteger("service_id");
+            $table->unsignedBigInteger("service_id");
+            // 予約対象となるサービスの外部キー
+            $table->foreign("service_id")->references("id")->on("services");
             // 使用開始予定日
             $table->dateTime("from_datetime");
             // 使用終了日
             $table->dateTime("to_datetime");
             // ゲストID
-            $table->bigInteger("guest_id");
+            $table->unsignedBigInteger("guest_id");
+            // 予約申請者はguestテーブルに登録すること
+            $table->foreign("guest_id")->references("id")->on("guests");
             $table->text("memo")->nullable();
             $table->tinyInteger("is_canceled")->default(0);
             $table->integer("created_by")->nullable();

@@ -17,9 +17,12 @@ class CreateServicesTable extends Migration
         Schema::create('services', function (Blueprint $table) {
             $table->id();
             $table->string("service_name", 512);
-            // 物品の所有者
-            $table->string("owner_id", 512)->default(0);
+            // サービスの所有者
+            $table->unsignedBigInteger("owner_id");
+            // サービス所有者の外部キー
+            $table->foreign("owner_id")->references("id")->on("owners");
             $table->text("memo")->nullable();
+            // 利用可能人数
             $table->integer("capacity")->nullable();
             // 枠ごとの時間
             $table->integer("price")->default(0);
@@ -34,11 +37,12 @@ class CreateServicesTable extends Migration
             $table->integer("updated_by")->nullable();
             $table->timestamps();
 
-            // // ユニークキー
-            // $table->unique([
-            //     "service_name",
-            //     "service_type",
-            // ]);
+            // ユニークキー
+            $table->unique([
+                // "owner_id",
+                "service_name",
+                "service_type",
+            ]);
         });
     }
 
