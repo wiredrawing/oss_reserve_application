@@ -45,7 +45,7 @@ Route::group([
             "uses" => "GuestController@update",
         ]);
         // 指定したゲスト情報を取得
-        Route::post("/{guest_id}", [
+        Route::get("/{guest_id}", [
             "as" => "detail",
             "uses" => "GuestController@detail",
         ]);

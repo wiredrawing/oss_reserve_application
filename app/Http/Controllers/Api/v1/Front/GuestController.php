@@ -23,8 +23,9 @@ class GuestController extends Controller
     {
         try {
             $post_data = $request->validated();
+
             // アクセス用のランダムトークンを生成
-            $token = RandomToken::MakeRandomToken(32);
+            $token = RandomToken::MakeRandomToken(64);
 
             // このランダムトークンと重複していないかをDBで調べる
             $guest = Guest::where("token", $token)->get()->first();
@@ -41,6 +42,81 @@ class GuestController extends Controller
             $response = [
                 "status" => true,
                 "data" => $guest
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            $response = [
+                "status" => false,
+                "data" => $e,
+            ];
+            return response()->json($response);
+        }
+    }
+
+
+
+    /**
+     * 指定したguest_idのゲスト情報を更新する
+     *
+     * @param GuestRequest $request
+     * @param integer $guest_id
+     * @return void
+     */
+    public function update (GuestRequest $request, int $guest_id)
+    {
+        try {
+
+            $post_data = $request->validated();
+
+            $guest = Guest::where("is_displayed", Config("const.binary_type.on"))
+            ->where("is_deleted", Config("const.binary_type.off"))
+            ->find($guest_id);
+
+            // ゲスト情報をアップデート
+            $result = $guest->fill($post_data)->save();
+
+            if ($result !== true) {
+                throw new \Exception("ゲスト情報のアップデートに失敗しました｡");
+            }
+
+            // レスポンスを整形
+            $response = [
+                "status" => true,
+                "data" => $guest
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            $response = [
+                "status" => false,
+                "data" => $e,
+            ];
+            return response()->json($response);
+        }
+    }
+
+
+    /**
+     * 指定したゲスト情報を取得する
+     *
+     * @param GuestRequest $request
+     * @param integer $guest_id
+     * @return void
+     */
+    public function detail(GuestRequest $request, int $guest_id)
+    {
+        try {
+            $guest = Guest::where("is_displayed", Config("const.binary_type.on"))
+            ->where("is_deleted", Config("const.binary_type.off"))
+            ->find($guest_id);
+
+            // ゲスト情報の存在チェック
+            if ($guest === NULL) {
+                throw new \Exception("指定したゲスト情報が見つかりません｡");
+            }
+
+            $response = [
+                "status" => true,
+                "data" => $guest,
             ];
             return response()->json($response);
         } catch (\Throwable $e) {

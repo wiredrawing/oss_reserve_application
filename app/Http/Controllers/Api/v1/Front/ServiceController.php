@@ -57,12 +57,10 @@ class ServiceController extends Controller
 
             // 更新対象のレコード取得
             $service = Service::find($service_id);
-            var_dump("更新前");
-            print_r($service->toArray());
+
             // レコードの更新処理
             $result = $service->fill($post_data)->save();
-            var_dump("更新あと");
-            print_r($service->toArray());
+
             // SQLクエリの成功可否
             if ($result !== true) {
                 throw new \Exception("指定したサービス情報のアップデートに失敗しました｡");
@@ -83,9 +81,45 @@ class ServiceController extends Controller
         }
     }
 
+    // /**
+    //  * 指定したサービスIDに紐づくサービス情報を返却する
+    //  *
+    //  * @param ServiceRequest $request
+    //  * @param integer $service_id
+    //  * @return void
+    //  */
+    // public function detail(ServiceRequest $request, int $service_id)
+    // {
+    //     try {
+    //         $service = Service::with([
+    //             "reserves",
+    //         ])
+    //         ->where("is_displayed", Config("const.binary_type.on"))
+    //         ->where("is_deleted", Config("const.binary_type.off"))
+    //         ->find($service_id);
+
+    //         if ($service === NULL) {
+    //             throw new \Exception("指定した予約可能なサービスが見つかりませんでした｡");
+    //         }
+
+    //         $response = [
+    //             "status" => true,
+    //             "data" => $service,
+
+    //         ];
+    //         return response()->json($response);
+    //     } catch (\Throwable $e) {
+    //         logger()->error($e);
+    //         $response = [
+    //             "status" => false,
+    //             "data" => $e->getMessage(),
+    //         ];
+    //         return response()->json($response);
+    //     }
+    // }
 
     /**
-     * 現在予約可能なサービス一覧を取得する
+     * 現在予約可能なサービス一覧かつ､そのサービスの予約状況を取得する
      *
      * @param ServiceRequest $request
      * @return void
@@ -93,7 +127,9 @@ class ServiceController extends Controller
     public function list(ServiceRequest $request)
     {
         try {
-            $services = Service::where([
+            $services = Service::with([
+                "reserves",
+            ])->where([
                 "is_displayed" => Config("const.binary_type.on"),
                 "is_deleted" => Config("const.binary_type.off"),
             ])

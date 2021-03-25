@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 use App\Models\Guest;
+use App\Models\Service;
 use App\Models\Reserve;
+use Symfony\Component\HttpFoundation\ServerBag;
 
 class ReserveRequest extends FormRequest
 {
@@ -42,7 +44,14 @@ class ReserveRequest extends FormRequest
                     "service_id" => [
                         "required",
                         "integer",
-                        // Rule::exists("rooms", "id"),
+                        function ($attribute, $value, $fail) {
+                            $service = Service::where("is_displayed", Config("const.binary_type.on"))
+                            ->where("is_deleted", Config("const.binary_type.off"))
+                            ->find($value);
+                            if ($service === NULL) {
+                                $fail("指定した:attributeが見つかりません｡");
+                            }
+                        }
                     ],
                     "guest_id" => [
                         "nullable",

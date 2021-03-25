@@ -39,22 +39,22 @@ class GuestRequest extends FormRequest
                     "family_name" => [
                         "required",
                         "string",
-                        "between:,512",
+                        "between:1,512",
                     ],
                     "given_name" => [
                         "required",
                         "string",
-                        "between:,512",
+                        "between:1,512",
                     ],
                     "family_name_sort" => [
                         "required",
                         "string",
-                        "between:,512",
+                        "between:1,512",
                     ],
                     "given_name_sort" => [
                         "required",
                         "string",
-                        "between:,512",
+                        "between:1,512",
                     ],
                     "email" => [
                         "required",
@@ -89,13 +89,21 @@ class GuestRequest extends FormRequest
                     "guest_id" => [
                         "required",
                         "integer",
-                        Rule::exists("guests", "id"),
+                        function ($attribute, $value, $fail) {
+                            $guest = Guest::where("is_displayed", Config("const.binary_type.on"))
+                            ->where("is_deleted", Config("const.binary_type.off"))
+                            ->find($value);
+                            // 指定したゲスト情報が存在するかどうか
+                            if ($guest === NULL) {
+                                $fail("指定した{$attribute}のゲスト情報が見つかりません｡");
+                            }
+                        }
                     ],
-                    "token" => [
-                        "required",
-                        "string",
-                        Rule::exists("guests", "toke"),
-                    ],
+                    // "token" => [
+                    //     "required",
+                    //     "string",
+                    //     Rule::exists("guests", "toke"),
+                    // ],
                     "family_name" => [
                         "required",
                         "string",
@@ -136,6 +144,11 @@ class GuestRequest extends FormRequest
                         "nullable",
                         "string",
                         "max:1024",
+                    ],
+                    "memo" => [
+                        "nullable",
+                        "string",
+                        "max:1024",
                     ]
                 ];
             }
@@ -149,28 +162,35 @@ class GuestRequest extends FormRequest
                     "guest_id" => [
                         "required",
                         "integer",
-                        Rule::exists("guests", "id"),
-                        function ($attribute, $value, $fail, $all) {
-                            $guest = Guest::where("id", $this->route()->parameter("guest_id"))
-                            ->where("token", $this->route()->parameter("token"))
-                            ->get()
-                            ->first();
+                        function ($attribute, $value, $fail) {
+                            $guest = Guest::where("is_displayed", Config("const.binary_type.on"))
+                            ->where("is_deleted", Config("const.binary_type.off"))
+                            ->find($value);
+
+                            // ゲスト情報の存在チェック
                             if ($guest === NULL) {
-                                $fail("ゲスト情報が見つかりません｡");
+                                $fail("指定した $attribute のゲスト情報が見つかりません｡");
                             }
                         }
                     ],
-                    "token" => [
-                        "required",
-                        "string",
-                        Rule::exists("guests", "token")
-                    ]
+                    // "token" => [
+                    //     "required",
+                    //     "string",
+                    //     Rule::exists("guests", "token")
+                    // ]
                 ];
             }
         }
 
         return $rules;
     }
+
+
+    public function validationData()
+    {
+        return array_merge($this->all(), $this->route()->parameters());
+    }
+
 
     //エラー時HTMLページにリダイレクトされないようにオーバーライド
     protected function failedValidation(Validator $validator)
