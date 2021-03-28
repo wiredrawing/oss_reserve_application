@@ -49,6 +49,11 @@ Route::group([
             "as" => "detail",
             "uses" => "GuestController@detail",
         ]);
+        // 登録中の全ゲストデータを取得
+        Route::get("/", [
+            "as" => "index",
+            "uses" => "GuestController@index",
+        ]);
     });
 
     Route::group([

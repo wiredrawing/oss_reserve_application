@@ -55,8 +55,17 @@ class ServiceController extends Controller
         try {
             $post_data = $request->validated();
 
+            DB::beginTransaction();
             // 更新対象のレコード取得
-            $service = Service::find($service_id);
+            $service = Service::lockForUpdate()
+            ->where("id", $service_id)
+            ->get()
+            ->first();
+
+            // レコード存在チェック
+            if ($service === NULL) {
+                throw new \Exception("指定したサービス情報が見つかりません｡");
+            }
 
             // レコードの更新処理
             $result = $service->fill($post_data)->save();
@@ -66,12 +75,14 @@ class ServiceController extends Controller
                 throw new \Exception("指定したサービス情報のアップデートに失敗しました｡");
             }
 
+            DB::commit();
             $response = [
                 "status" => true,
                 "data" => $service,
             ];
             return response()->json($response);
         } catch (\Throwable $e) {
+            DB::rollback();
             logger()->error($e);
             $response = [
                 "status" => false,
@@ -129,6 +140,7 @@ class ServiceController extends Controller
         try {
             $services = Service::with([
                 "reserves",
+                "owner",
             ])->where([
                 "is_displayed" => Config("const.binary_type.on"),
                 "is_deleted" => Config("const.binary_type.off"),
@@ -163,21 +175,19 @@ class ServiceController extends Controller
             $get_data = $request->validated();
             logger()->info($get_data);
 
-            $service = Service::with([
-                "reserves" => function ($query) {
-                    $query
-                    ->where("is_confirmed", Config("const.binary_type.on"))
-                    ->where("is_canceled", Config("const.binary_type.off"))
-                    // リクエスト日時移行のスケジュールを取得
-                    ->where("to_datetime", ">=", date("Y-m-d H:i:s"))
-                    ->orderBy("to_datetime", "asc");
-                }
+            $reserves = Reserve::with([
+                "guest",
+            ])->where([
+                ["is_canceled", "=", Config("const.binary_type.off")],
+                ["to_datetime", ">=", date("Y-m-d H:i:s")],
+                ["service_id", "=", $service_id]
             ])
-            ->find($service_id);
+            ->orderBy("to_datetime", "asc")
+            ->get();
 
             $response = [
                 "status" => true,
-                "data" => $service,
+                "data" => $reserves,
             ];
             return response()->json($response);
         } catch (\Throwable $e) {
@@ -204,11 +214,13 @@ class ServiceController extends Controller
         try {
             $get_data = $request->validated();
             // 対象の予約情報を取得
-            $reservation = Reserve::where("service_id", $service_id)
-            ->where("is_confirmed", Config("const.binary_type.on"))
-            ->where("is_canceled", Config("const.binary_type.off"))
+            $reservation = Reserve::where([
+                ["service_id", "=", $service_id],
+                ["is_canceled", "=", Config("const.binary_type.off")],
+            ])
             ->with([
                 "service",
+                "guest",
             ])
             ->find($reserve_id);
 
@@ -217,12 +229,13 @@ class ServiceController extends Controller
             }
 
             // 以下指定した時間帯での重複ブッキングを検出する
-            $duplicated_reservation = Reserve::where("service_id", $get_data["service_id"])
-            ->where("id", "!=", $get_data["reserve_id"])
-            ->where("is_confirmed", Config("const.binary_type.on"))
-            ->where("is_canceled", Config("const.binary_type.off"))
-            ->where("from_datetime", "<=", $reservation->to_datetime)
-            ->where("to_datetime", ">", $reservation->from_datetime)
+            $duplicated_reservation = Reserve::where([
+                ["service_id", "=", $get_data["service_id"]],
+                ["id", "!=", $get_data["reserve_id"]],
+                ["is_canceled", "=", Config("const.binary_type.off")],
+                ["from_datetime", "<=", $reservation->to_datetime],
+                ["to_datetime", ">", $reservation->from_datetime],
+            ])
             ->get();
 
             $response = [

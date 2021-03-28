@@ -33,7 +33,8 @@ class CreateReservesTable extends Migration
             $table->integer("updated_by")->nullable();
 
             // 予約確定フラグ 0の場合は仮押さえ
-            $table->tinyInteger("is_confirmed")->default(0);
+            // $table->tinyInteger("is_confirmed")->default(0);
+
             // 仮押さえの有効期限(初回POST後､30分)
             $table->dateTime("expired_at");
 

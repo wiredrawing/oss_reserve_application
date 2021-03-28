@@ -50,7 +50,7 @@ class ReserveController extends Controller
     public function update(ReserveRequest $request, int $reserve_id, string $token = "")
     {
         try {
-            $updated_reservation = Reserve::updateExistingReservation($request, $reserve_id);
+            $updated_reservation = Reserve::makeNewReservation($request, $reserve_id);
             // DB::commit();
             $response = [
                 "status" => true,
@@ -85,6 +85,7 @@ class ReserveController extends Controller
 
             $reservation = Reserve::with([
                 "service",
+                "guest",
             ])
             ->where("is_confirmed", Config("const.binary_type.on"))
             ->find($validated_data["reserve_id"]);
@@ -95,6 +96,37 @@ class ReserveController extends Controller
             $response = [
                 "status" => true,
                 "data" => $reservation,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
+
+
+    /**
+     * 現在､確定されている予約情報一覧
+     *
+     * @param ReserveRequest $request
+     * @return void
+     */
+    public function list(ReserveRequest $request)
+    {
+        try {
+            $reserves = Reserve::with([
+                "guest",
+                "service",
+            ])->where([
+                ["is_canceled", "=", Config("const.binary_type.off")],
+            ])
+            ->get();
+            $response = [
+                "status" => true,
+                "data" => $reserves,
             ];
             return response()->json($response);
         } catch (\Throwable $e) {

@@ -6,11 +6,43 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\GuestRequest;
 use App\Models\Guest;
 use App\Libraries\RandomToken;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 class GuestController extends Controller
 {
 
 
+    /**
+     * 全ゲスト情報を取得する
+     *
+     * @param GuestRequest $request
+     * @return void
+     */
+    public function index(GuestRequest $request)
+    {
+        try {
+            $guests = Guest::with([
+                "reserves"
+            ])->where([
+                ["is_displayed", "=", Config("const.binary_type.on")],
+                ["is_deleted", "=", Config("const.binary_type.off")]
+            ])
+            ->get();
+
+            // レスポンス返却
+            $response = [
+                "status" => true,
+                "data" => $guests,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            $response = [
+                "status" => false,
+                "data" => $e,
+            ];
+            return response()->json($response);
+        }
+    }
 
 
     /**
@@ -68,9 +100,16 @@ class GuestController extends Controller
 
             $post_data = $request->validated();
 
-            $guest = Guest::where("is_displayed", Config("const.binary_type.on"))
-            ->where("is_deleted", Config("const.binary_type.off"))
-            ->find($guest_id);
+            DB::beginTransaction();
+
+            $guest = Guest::lockForUpdate()
+            ->where([
+                ["id", "=", $guest_id],
+                ["is_displayed", "=", Config("const.binary_type.on")],
+                ["is_deleted", "=", Config("const.binary_type.off")],
+            ])
+            ->get()
+            ->first();
 
             // ゲスト情報をアップデート
             $result = $guest->fill($post_data)->save();
@@ -79,6 +118,8 @@ class GuestController extends Controller
                 throw new \Exception("ゲスト情報のアップデートに失敗しました｡");
             }
 
+            DB::commit();
+
             // レスポンスを整形
             $response = [
                 "status" => true,
@@ -86,6 +127,7 @@ class GuestController extends Controller
             ];
             return response()->json($response);
         } catch (\Throwable $e) {
+            DB::rollback();
             $response = [
                 "status" => false,
                 "data" => $e,

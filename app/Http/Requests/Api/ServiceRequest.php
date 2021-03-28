@@ -38,7 +38,9 @@ class ServiceRequest extends FormRequest
             if ($route_name === "api.front.service.create") {
                 $rules = [
                     "owner_id" => [
-                        "nullable",
+                        "required",
+                        "integer",
+                        Rule::exists("owners", "id"),
                     ],
                     "service_name" => [
                         "required",

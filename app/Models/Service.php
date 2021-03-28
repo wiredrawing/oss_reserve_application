@@ -11,7 +11,7 @@ class Service extends Model
     protected $fillable = [
         "service_name",
         "service_type",
-        "owner_name",
+        "owner_id",
         "capacity",
         "price",
         "price_per_hour",
@@ -26,5 +26,10 @@ class Service extends Model
     public function reserves()
     {
         return $this->hasMany(Reserve::class, "service_id");
+    }
+
+    public function owner()
+    {
+        return $this->hasOne(Owner::class, "id", "owner_id");
     }
 }

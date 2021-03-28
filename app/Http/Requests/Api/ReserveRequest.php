@@ -270,6 +270,8 @@ class ReserveRequest extends FormRequest
                     //     }
                     // ]
                 ];
+            } else if ($route_name === "api.front.reserve.list") {
+                $rules = [];
             }
         }
 

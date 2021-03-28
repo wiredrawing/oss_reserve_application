@@ -179,6 +179,8 @@ class GuestRequest extends FormRequest
                     //     Rule::exists("guests", "token")
                     // ]
                 ];
+            } else if ($route_name === "api.front.guest.index") {
+                $rules = [];
             }
         }
 
