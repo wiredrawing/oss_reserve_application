@@ -125,5 +125,10 @@ Route::group([
             "as" => "duplication_check",
             "uses" => "ServiceController@duplication_check",
         ]);
+        // 指定したサービス情報の詳細を取得
+        Route::get("/detail/{service_id}", [
+            "as" => "detail",
+            "uses" => "ServiceController@detail"
+        ]);
     });
 });

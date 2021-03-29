@@ -92,42 +92,42 @@ class ServiceController extends Controller
         }
     }
 
-    // /**
-    //  * 指定したサービスIDに紐づくサービス情報を返却する
-    //  *
-    //  * @param ServiceRequest $request
-    //  * @param integer $service_id
-    //  * @return void
-    //  */
-    // public function detail(ServiceRequest $request, int $service_id)
-    // {
-    //     try {
-    //         $service = Service::with([
-    //             "reserves",
-    //         ])
-    //         ->where("is_displayed", Config("const.binary_type.on"))
-    //         ->where("is_deleted", Config("const.binary_type.off"))
-    //         ->find($service_id);
+    /**
+     * 指定したサービスIDに紐づくサービス情報を返却する
+     *
+     * @param ServiceRequest $request
+     * @param integer $service_id
+     * @return void
+     */
+    public function detail(ServiceRequest $request, int $service_id)
+    {
+        try {
+            $service = Service::with([
+                "reserves",
+            ])
+            ->where("is_displayed", Config("const.binary_type.on"))
+            ->where("is_deleted", Config("const.binary_type.off"))
+            ->find($service_id);
 
-    //         if ($service === NULL) {
-    //             throw new \Exception("指定した予約可能なサービスが見つかりませんでした｡");
-    //         }
+            if ($service === NULL) {
+                throw new \Exception("指定した予約可能なサービスが見つかりませんでした｡");
+            }
 
-    //         $response = [
-    //             "status" => true,
-    //             "data" => $service,
+            $response = [
+                "status" => true,
+                "data" => $service,
 
-    //         ];
-    //         return response()->json($response);
-    //     } catch (\Throwable $e) {
-    //         logger()->error($e);
-    //         $response = [
-    //             "status" => false,
-    //             "data" => $e->getMessage(),
-    //         ];
-    //         return response()->json($response);
-    //     }
-    // }
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
 
     /**
      * 現在予約可能なサービス一覧かつ､そのサービスの予約状況を取得する
@@ -177,6 +177,7 @@ class ServiceController extends Controller
 
             $reserves = Reserve::with([
                 "guest",
+                "service",
             ])->where([
                 ["is_canceled", "=", Config("const.binary_type.off")],
                 ["to_datetime", ">=", date("Y-m-d H:i:s")],
