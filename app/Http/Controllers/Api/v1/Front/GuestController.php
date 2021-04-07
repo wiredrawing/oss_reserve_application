@@ -102,6 +102,7 @@ class GuestController extends Controller
 
             DB::beginTransaction();
 
+            // 専有ロックを行ロックする
             $guest = Guest::lockForUpdate()
             ->where([
                 ["id", "=", $guest_id],

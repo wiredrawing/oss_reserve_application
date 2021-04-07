@@ -87,8 +87,11 @@ class ReserveController extends Controller
                 "service",
                 "guest",
             ])
-            ->where("is_confirmed", Config("const.binary_type.on"))
-            ->find($validated_data["reserve_id"]);
+            ->where([
+                ["is_canceled", "=", Config("const.binary_type.off")],
+                ["user_token", "=", $token],
+            ])
+            ->find($reserve_id);
 
             if ($reservation === NULL) {
                 throw new \Exception("予約情報を取得できません｡");

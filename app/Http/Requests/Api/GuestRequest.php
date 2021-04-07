@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use App\Models\Guest;
+use App\Rules\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Route;
@@ -74,8 +75,7 @@ class GuestRequest extends FormRequest
                     ],
                     "phone_number" => [
                         "required",
-                        "string",
-                        "between:1,32",
+                        new PhoneNumber(),
                     ],
                     "option" => [
                         "nullable",
@@ -97,7 +97,7 @@ class GuestRequest extends FormRequest
                             if ($guest === NULL) {
                                 $fail("指定した{$attribute}のゲスト情報が見つかりません｡");
                             }
-                        }
+                        },
                     ],
                     // "token" => [
                     //     "required",
@@ -137,8 +137,7 @@ class GuestRequest extends FormRequest
                     // ],
                     "phone_number" => [
                         "required",
-                        "string",
-                        "between:1,32",
+                        new PhoneNumber(),
                     ],
                     "option" => [
                         "nullable",
