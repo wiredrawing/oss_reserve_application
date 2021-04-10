@@ -24,6 +24,28 @@ Route::group([
     "as" => "api.front.",
 ], function () {
 
+    // ユーティリティー情報を取得する
+    Route::group([
+        "prefix" => "utility",
+        "as" => "utility.",
+    ], function () {
+        Route::get("/service_type", [
+            "as" => "service_type",
+            "uses" => "UtilityController@service_type"
+        ]);
+    });
+
+    // オーナー情報関連
+    Route::group([
+        "prefix" => "owner",
+        "as" => "owner.",
+    ], function () {
+        Route::get("/list", [
+            "as" => "list",
+            "uses" => "OwnerController@list"
+        ]);
+    });
+
     // ゲスト情報
     Route::group([
         "prefix" => "guest",

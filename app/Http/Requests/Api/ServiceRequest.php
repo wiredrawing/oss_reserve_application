@@ -8,7 +8,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
-class ServiceRequest extends FormRequest
+class ServiceRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -171,21 +171,4 @@ class ServiceRequest extends FormRequest
     }
 
 
-
-    public function validationData()
-    {
-        return array_merge($this->all(), $this->route()->parameters());
-    }
-
-
-    //エラー時HTMLページにリダイレクトされないようにオーバーライド
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(
-            response()->json(
-                $validator->errors(),
-                422
-            )
-        );
-    }
 }

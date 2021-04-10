@@ -4,12 +4,14 @@ namespace App\Http\Requests\Api;
 
 use App\Models\Guest;
 use App\Rules\PhoneNumber;
+use App\Http\Requests\Api\BaseRequest;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
-class GuestRequest extends FormRequest
+
+class GuestRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -184,23 +186,5 @@ class GuestRequest extends FormRequest
         }
 
         return $rules;
-    }
-
-
-    public function validationData()
-    {
-        return array_merge($this->all(), $this->route()->parameters());
-    }
-
-
-    //エラー時HTMLページにリダイレクトされないようにオーバーライド
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(
-            response()->json(
-                $validator->errors(),
-                422
-            )
-        );
     }
 }

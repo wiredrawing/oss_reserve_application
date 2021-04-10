@@ -12,7 +12,7 @@ use App\Models\Service;
 use App\Models\Reserve;
 use Symfony\Component\HttpFoundation\ServerBag;
 
-class ReserveRequest extends FormRequest
+class ReserveRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -281,13 +281,6 @@ class ReserveRequest extends FormRequest
         return $rules;
     }
 
-
-    public function validationData()
-    {
-        return array_merge($this->all(), $this->route()->parameters());
-    }
-
-
     public function messages()
     {
         return [
@@ -300,16 +293,5 @@ class ReserveRequest extends FormRequest
         return [
 
         ];
-    }
-
-    //エラー時HTMLページにリダイレクトされないようにオーバーライド
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(
-            response()->json(
-                $validator->errors(),
-                422
-            )
-        );
     }
 }
