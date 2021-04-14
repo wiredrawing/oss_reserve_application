@@ -44,6 +44,18 @@ Route::group([
             "as" => "list",
             "uses" => "OwnerController@list"
         ]);
+        Route::post("/create", [
+            "as" => "create",
+            "uses" => "OwnerController@create",
+        ]);
+        Route::get("/detail/{owner_id}", [
+            "as" => "detail",
+            "uses" => "OwnerController@detail",
+        ]);
+        Route::post("/update/{owner_id}", [
+            "as" => "update",
+            "uses" => "OwnerController@update",
+        ]);
     });
 
     // ゲスト情報
@@ -151,6 +163,29 @@ Route::group([
         Route::get("/detail/{service_id}", [
             "as" => "detail",
             "uses" => "ServiceController@detail"
+        ]);
+    });
+
+    Route::group([
+        "prefix" => "image",
+        "as" => "image.",
+    ], function () {
+        // 画像一覧を取得
+        Route::get("/owner/{owner_id}", [
+            "as" => "owner",
+            "uses" => "ImageController@owner",
+        ]);
+        Route::get("/service/{service_id}", [
+            "as" => "service",
+            "uses" => "ImageController@service",
+        ]);
+        Route::get("/show/{image_id}", [
+            "as" => "show",
+            "uses" => "ImageController@show",
+        ]);
+        Route::post("/upload", [
+            "as" => "upload",
+            "uses" => "ImageController@upload",
         ]);
     });
 });

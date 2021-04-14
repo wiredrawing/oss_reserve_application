@@ -35,7 +35,87 @@ class OwnerRequest extends BaseRequest
         if ($method === "GET") {
             if ($route_name === "api.front.owner.list") {
                 $rules = [];
+            } else if ($route_name === "api.front.owner.detail") {
+                $rules = [
+                    "owner_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("owners", "id")->where(function ($query) {
+                            $query
+                            ->where("is_displayed", Config("const.binary_type")["on"])
+                            ->where("is_deleted", Config("const.binary_type")["off"]);
+                        }),
+                    ]
+                ];
             }
+        } else if ($method === "POST") {
+            if ($route_name === "api.front.owner.create") {
+                $rules = [
+                    "owner_name" => [
+                        "required",
+                        "string",
+                        "between:1,255",
+                    ],
+                    "owner_name_sort" => [
+                        "required",
+                        "string",
+                        "between:1,255",
+                    ],
+                    "phone_number" => [
+                        "required",
+                        "string",
+                        "between:1,16",
+                    ],
+                    "email" => [
+                        "required",
+                        "string",
+                        "email:rfc",
+                    ],
+                    "description" => [
+                        "nullable",
+                        "string",
+                        "between:0,2048",
+                    ]
+                ];
+            } else if ($route_name === "api.front.owner.update") {
+                $rules = [
+                    "owner_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("owners", "id")->where(function ($query) {
+                            $query
+                            ->where("is_displayed", Config("const.binary_type")["on"])
+                            ->where("is_deleted", Config("const.binary_type")["off"]);
+                        }),
+                    ],
+                    "owner_name" => [
+                        "required",
+                        "string",
+                        "between:1,255",
+                    ],
+                    "owner_name_sort" => [
+                        "required",
+                        "string",
+                        "between:1,255",
+                    ],
+                    "phone_number" => [
+                        "required",
+                        "string",
+                        "between:1,16",
+                    ],
+                    "email" => [
+                        "required",
+                        "string",
+                        "email:rfc",
+                    ],
+                    "description" => [
+                        "nullable",
+                        "string",
+                        "between:0,2048",
+                    ]
+                ];
+            }
+
         }
 
         return $rules;
