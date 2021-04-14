@@ -35,9 +35,29 @@ class ImageRequest extends BaseRequest
         if ($method === "POST") {
 
             if ($route_name === "api.front.image.upload") {
-
+                $rules = [
+                    "owner_id" => [
+                        "nullable",
+                        "integer",
+                        Rule::exists("owners", "id"),
+                    ],
+                    "service_id" => [
+                        "nullable",
+                        "integer",
+                        Rule::exists("services", "id"),
+                    ],
+                    "upload_image" => [
+                        "required",
+                        "image",
+                        "max:5120"
+                    ],
+                    "description" => [
+                        "nullable",
+                        "string",
+                        "between:0,2048",
+                    ]
+                ];
             }
-
         } else if ($method === "GET") {
 
             if ($route_name === "api.front.image.owner") {

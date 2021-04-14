@@ -42,7 +42,6 @@ class OwnerRequest extends BaseRequest
                         "integer",
                         Rule::exists("owners", "id")->where(function ($query) {
                             $query
-                            ->where("is_displayed", Config("const.binary_type")["on"])
                             ->where("is_deleted", Config("const.binary_type")["off"]);
                         }),
                     ]
@@ -84,7 +83,6 @@ class OwnerRequest extends BaseRequest
                         "integer",
                         Rule::exists("owners", "id")->where(function ($query) {
                             $query
-                            ->where("is_displayed", Config("const.binary_type")["on"])
                             ->where("is_deleted", Config("const.binary_type")["off"]);
                         }),
                     ],
