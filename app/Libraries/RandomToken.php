@@ -14,8 +14,12 @@ namespace App\Libraries {
          * @param boolean $exception
          * @return string
          */
-        static public function MakeRandomToken (int $length = 64, string $prefix = "", bool $exception = true): string
+        static public function MakeRandomToken (int $length = 64, string $prefix = "TOKEN_", bool $exception = true): string
         {
+            // 生成トークンの長さがDBの指定カラムよりな長い場合はでおフォルトに
+            if ($length > Config("const.max_token_length")) {
+                $length = 64;
+            }
 
             // プレフィックスが指定されている場合
             if (strlen($prefix) > 0) {
@@ -31,15 +35,13 @@ namespace App\Libraries {
             $characters[] = "-";
             $characters[] = "_";
             $characters[] = "!";
-            $characters[] = ".";
-            $characters[] = "*";
             // $characters[] = "!";
             // $characters[] = "$";
             // $characters[] = "^";
             $characters[] = "=";
             $token_size = count($characters);
             for ($i = 1; $i <= $length; $i++ ) {
-                $offset = mt_rand(0, $token_size -1 );
+                $offset = random_int(0, $token_size -1 );
                 if (array_key_exists($offset, $characters) !== true) {
                     throw new \Exception ("Happened accessing invalid index of \$characters.");
                 }

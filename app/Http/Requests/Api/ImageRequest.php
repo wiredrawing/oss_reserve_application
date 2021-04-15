@@ -49,7 +49,7 @@ class ImageRequest extends BaseRequest
                     "upload_image" => [
                         "required",
                         "image",
-                        "max:5120"
+                        "max:10240"
                     ],
                     "description" => [
                         "nullable",
