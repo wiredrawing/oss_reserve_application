@@ -10,11 +10,22 @@ class Image extends Model
     protected $fillable = [
         "name",
         "description",
-        // service_id あるいは owner_idをマストとする
-        "service_id",
-        "owner_id",
         "token",
         "is_displayed",
         "is_deleted",
+        "filename",
+        "good_count",
     ];
+
+    protected $appends = [
+        "show_url",
+    ];
+
+
+    public function getShowUrlAttribute()
+    {
+        return action("Api\\v1\\Front\\ImageController@show", [
+            "image_id" => $this->id
+        ]);
+    }
 }

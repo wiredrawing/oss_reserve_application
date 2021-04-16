@@ -183,6 +183,14 @@ Route::group([
             "as" => "show",
             "uses" => "ImageController@show",
         ]);
+        Route::post("/good/{image_id}", [
+            "as" => "good",
+            "uses" => "ImageController@good",
+        ]);
+        Route::post("/delete/{image_id}", [
+            "as" => "delete",
+            "uses" => "ImageController@delete"
+        ]);
         Route::post("/upload", [
             "as" => "upload",
             "uses" => "ImageController@upload",

@@ -46,15 +46,48 @@ class ImageRequest extends BaseRequest
                         "integer",
                         Rule::exists("services", "id"),
                     ],
+                    "owner_id" => [
+                        "nullable",
+                        "integer",
+                        Rule::exists("owners", "id"),
+                    ],
                     "upload_image" => [
                         "required",
                         "image",
                         "max:10240"
                     ],
+                    "name" => [
+                        "required",
+                        "string",
+                        "between:0,256",
+                    ],
                     "description" => [
                         "nullable",
                         "string",
                         "between:0,2048",
+                    ],
+                ];
+            } else if ($route_name === "api.v1.front.image.good") {
+                $rules = [
+                    "image_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("images", "id")->where(function ($query) {
+                            $query
+                            ->where("is_displayed", Config("const.binary_type")["on"])
+                            ->where("is_deleted", Config("const.binary_type")["off"]);
+                        })
+                    ]
+                ];
+            } else if ($route_name === "api.v1.front.image.delete") {
+                // 未削除の画像を削除する
+                $rules = [
+                    "image_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("images", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                        })
                     ]
                 ];
             }

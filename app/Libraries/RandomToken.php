@@ -14,7 +14,7 @@ namespace App\Libraries {
          * @param boolean $exception
          * @return string
          */
-        static public function MakeRandomToken (int $length = 64, string $prefix = "TOKEN_", bool $exception = true): string
+        static public function MakeRandomToken (int $length = 64, string $prefix = "", bool $exception = true): string
         {
             // 生成トークンの長さがDBの指定カラムよりな長い場合はでおフォルトに
             if ($length > Config("const.max_token_length")) {

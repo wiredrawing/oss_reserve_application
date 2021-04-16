@@ -15,4 +15,9 @@ class Owner extends Model
         "phone_number",
         "description",
     ];
+
+    public function owner_images ()
+    {
+        return $this->hasMany(OwnerImage::class, "owner_id", "id");
+    }
 }

@@ -60,4 +60,9 @@ class Service extends Model
             return $this->updated_at->format("Y年n月j日")."<br>".$this->updated_at->format("H時i分s秒");
         }
     }
+
+    public function owner_images ()
+    {
+        return $this->hasMany(ServiceImage::class, "service_id", "id");
+    }
 }
