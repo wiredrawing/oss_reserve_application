@@ -40,21 +40,21 @@ Route::group([
         "prefix" => "owner",
         "as" => "owner.",
     ], function () {
-        Route::get("/list", [
-            "as" => "list",
-            "uses" => "OwnerController@list"
-        ]);
         Route::post("/create", [
             "as" => "create",
             "uses" => "OwnerController@create",
         ]);
-        Route::get("/detail/{owner_id}", [
+        Route::get("/{owner_id}", [
             "as" => "detail",
             "uses" => "OwnerController@detail",
         ]);
-        Route::post("/update/{owner_id}", [
+        Route::post("/{owner_id}/update/", [
             "as" => "update",
             "uses" => "OwnerController@update",
+        ]);
+        Route::get("/", [
+            "as" => "list",
+            "uses" => "OwnerController@list"
         ]);
     });
 
@@ -170,15 +170,35 @@ Route::group([
         "prefix" => "image",
         "as" => "image.",
     ], function () {
-        // 画像一覧を取得
-        Route::get("/owner/{owner_id}", [
+        // 画像一覧を取得する
+        Route::get("/count", [
+            "as" => "count",
+            "uses" => "ImageController@count",
+        ]);
+        Route::get("/list", [
+            "as" => "list",
+            "uses" => "ImageController@list",
+        ]);
+        Route::get("/list/{offset}", [
+            "as" => "list",
+            "uses" => "ImageController@list",
+        ]);
+        Route::get("/list/{offset}/{limit}", [
+            "as" => "list",
+            "uses" => "ImageController@list",
+        ]);
+
+        // owner情報に画像を紐付ける
+        Route::post("/owner", [
             "as" => "owner",
             "uses" => "ImageController@owner",
         ]);
-        Route::get("/service/{service_id}", [
+        // service情報に画像を紐付ける
+        Route::post("/service", [
             "as" => "service",
             "uses" => "ImageController@service",
         ]);
+
         Route::get("/show/{image_id}", [
             "as" => "show",
             "uses" => "ImageController@show",

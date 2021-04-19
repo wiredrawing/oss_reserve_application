@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Api;
 
 use App\Http\Requests\Api\BaseRequest;
+use App\Models\ServiceImage;
+use App\Models\OwnerImage;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Route;
@@ -36,16 +38,6 @@ class ImageRequest extends BaseRequest
 
             if ($route_name === "api.front.image.upload") {
                 $rules = [
-                    "owner_id" => [
-                        "nullable",
-                        "integer",
-                        Rule::exists("owners", "id"),
-                    ],
-                    "service_id" => [
-                        "nullable",
-                        "integer",
-                        Rule::exists("services", "id"),
-                    ],
                     "owner_id" => [
                         "nullable",
                         "integer",
@@ -90,6 +82,64 @@ class ImageRequest extends BaseRequest
                         })
                     ]
                 ];
+            } else if ($route_name === "api.front.image.service") {
+                // 未削除の画像を削除する
+                $rules = [
+                    "image_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("images", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                        })
+                    ],
+                    "service_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("services", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                        }),
+                        // duplication check
+                        function ($attribute, $value, $fail) {
+                            $number = ServiceImage::where([
+                                ["service_id", "=", $value],
+                                ["image_id", "=", $this->input("image_id")],
+                            ])->count();
+                            // if it is greater than 0, return an error message.
+                            if ($number !== 0) {
+                                $fail("既に登録済みです｡");
+                            }
+                        }
+                    ]
+                ];
+            } else if ($route_name === "api.front.image.owner") {
+                // 未削除の画像を削除する
+                $rules = [
+                    "image_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("images", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                        })
+                    ],
+                    "owner_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("owners", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                        }),
+                        // duplication check
+                        function ($attribute, $value, $fail) {
+                            $number = OwnerImage::where([
+                                ["owner_id", "=", $value],
+                                ["image_id", "=", $this->input("image_id")],
+                            ])->count();
+                            // if it is greater than 0, return an error message.
+                            if ($number !== 0) {
+                                $fail("既に登録済みです｡");
+                            }
+                        }
+                    ]
+                ];
             }
         } else if ($method === "GET") {
 
@@ -129,9 +179,20 @@ class ImageRequest extends BaseRequest
                         })
                     ]
                 ];
+            } else if ($route_name === "api.front.image.list") {
+                $rules = [
+                    "offset" => [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                    ],
+                    "limit" => [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                    ],
+                ];
             }
-        } else {
-
         }
 
         return $rules;

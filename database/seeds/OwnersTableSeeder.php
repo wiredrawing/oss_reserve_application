@@ -16,6 +16,9 @@ class OwnersTableSeeder extends Seeder
             "owner_name" => "デフォルトオーナー",
             "owner_name_sort" => "デフォルトオーナー(よみがな)",
             "email" => "sample@sample.com",
+            "phone_number" => "090-1234-5678",
+            "description" => "description => seederから作成",
+            "memo" => "memo => seederから作成",
         ]);
     }
 }

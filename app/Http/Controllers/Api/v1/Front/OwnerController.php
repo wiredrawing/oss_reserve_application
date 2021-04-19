@@ -21,7 +21,8 @@ class OwnerController extends Controller
     public function list(OwnerRequest $request)
     {
         try {
-            $owners = Owner::get();
+            $owners = Owner::orderBy("id", "desc")
+            ->get();
             $response = [
                 "status" => true,
                 "data" => $owners,

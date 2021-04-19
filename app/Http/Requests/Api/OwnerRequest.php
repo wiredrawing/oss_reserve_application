@@ -74,6 +74,11 @@ class OwnerRequest extends BaseRequest
                         "nullable",
                         "string",
                         "between:0,2048",
+                    ],
+                    "memo" => [
+                        "nullable",
+                        "string",
+                        "between:0,2048",
                     ]
                 ];
             } else if ($route_name === "api.front.owner.update") {
@@ -107,6 +112,11 @@ class OwnerRequest extends BaseRequest
                         "email:rfc",
                     ],
                     "description" => [
+                        "nullable",
+                        "string",
+                        "between:0,2048",
+                    ],
+                    "memo" => [
                         "nullable",
                         "string",
                         "between:0,2048",

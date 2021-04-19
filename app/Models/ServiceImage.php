@@ -8,8 +8,7 @@ class ServiceImage extends Model
 {
 
 
-
-    protected $fill = [
+    protected $fillable = [
         "service_id",
         "image_id",
     ];

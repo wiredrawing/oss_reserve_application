@@ -21,9 +21,9 @@ class CreateServiceImagesTable extends Migration
 
             // unique
             $table->unique([
-                "owner_id",
+                "service_id",
                 "image_id",
-            ], "owner_images_service_id_image_id_unique");
+            ], "service_images_service_id_image_id_unique");
         });
     }
 

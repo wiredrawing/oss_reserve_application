@@ -24,6 +24,7 @@ class CreateOwnersTable extends Migration
             // オーナーの電話番号
             $table->string("phone_number", 16);
             $table->text("description")->nullable();
+            $table->text("memo")->nullable();
             $table->tinyInteger("is_displayed")->default(0);
             $table->tinyInteger("is_deleted")->default(0);
             $table->timestamps();

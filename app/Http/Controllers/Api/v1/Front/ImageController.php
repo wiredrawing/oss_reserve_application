@@ -20,25 +20,93 @@ class ImageController extends Controller
     private $temporary_path = "public/uploads/temporary";
 
 
+
     /**
-     * サービス基準の画像一覧を取得する
+     * 現在アップロード済みの未削除の画像件数を取得する
      *
      * @param ImageRequest $request
-     * @param integer $service_id
      * @return void
      */
-    public function service(ImageRequest $request, int $service_id)
+    public function count(ImageRequest $request)
     {
         try {
-            $service_images = ServiceImage::where([
-                ["service_id", "=", $service_id]
+            $image_count = Image::select(DB::raw("count(id)"))
+            ->where([
+                ["is_deleted", "=", Config("const.binary_type")["off"]],
             ])
-            ->get();
-
-            logger()->error($e);
+            ->count();
+            // dd($image_count->toSql(), $image_count->getBindings());
+            // var_dump($image_count);
+            // ページネーション後のデータのみを取得する
             $response = [
                 "status" => true,
-                "data" => $service_images,
+                "data" => [
+                    "count" => $image_count,
+                ]
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
+
+    /**
+     * アップロードした画像一覧を取得する
+     *
+     * @param ImageRequest $request
+     * @param integer $offset
+     * @param integer $limit
+     * @return void
+     */
+    public function list(ImageRequest $request, int $offset = 0, int $limit = 0)
+    {
+        try {
+            $images = Image::where([
+                ["is_deleted", "=", Config("const.binary_type")["off"]],
+            ])
+            ->orderBy("id", "desc")
+            ->offset($offset)
+            ->paginate($limit);
+
+            // ページネーション後のデータのみを取得する
+            $response = [
+                "status" => true,
+                "data" => $images->getCollection(),
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
+
+    /**
+     * Serviceと画像情報を紐付ける
+     *
+     * @param ImageRequest $request
+     * @return void
+     */
+    public function service(ImageRequest $request)
+    {
+        try {
+            // バリデーション結果を取得
+            $post_data = $request->validated();
+
+            $service_image = ServiceImage::create($post_data);
+
+            logger()->info($service_image);
+            $response = [
+                "status" => true,
+                "data" => $service_image,
             ];
             return response()->json($response);
         } catch (\Throwable $e) {
@@ -57,21 +125,19 @@ class ImageController extends Controller
      * オーナー基準の画像一覧を取得する
      *
      * @param ImageRequest $request
-     * @param integer $owner_id
      * @return void
      */
-    public function owner(ImageRequest $request, int $owner_id)
+    public function owner(ImageRequest $request)
     {
         try {
-            $owner_images = OwnerImage::where([
-                ["owner_id", "=", $owner_id]
-            ])
-            ->get();
+            $post_data = $request->validated();
 
-            logger()->error($e);
+            $owner_image = OwnerImage::create($post_data);
+
+            logger()->info($owner_image);
             $response = [
                 "status" => true,
-                "data" => $owner_images,
+                "data" => $owner_image,
             ];
             return response()->json($response);
         } catch (\Throwable $e) {
@@ -250,8 +316,9 @@ class ImageController extends Controller
             $iv = InterventionImage::make(Storage::disk("local")->path($temporary_filename))->orientate();
 
             // 規定サイズより画像の横幅が大きい場合は､リサイズ処理を実行
-            if ($iv->width() > Config("const.image.regulation_width")) {
-                $iv->resize(Config("const.image.regulation_width"), null, function ($constraint) {
+            $regulation_width = Config("const.image.regulation_width");
+            if ($iv->width() > $regulation_width) {
+                $iv->resize($regulation_width, null, function ($constraint) {
                     $constraint->aspectRatio();
                     $constraint->upsize();
                 })->save(Storage::disk("local")->path($temporary_filename), Config("const.image.compression"));

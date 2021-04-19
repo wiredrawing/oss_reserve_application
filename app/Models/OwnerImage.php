@@ -9,7 +9,7 @@ class OwnerImage extends Model
 
 
 
-    protected $fill = [
+    protected $fillable = [
         "owner_id",
         "image_id",
     ];
@@ -24,5 +24,15 @@ class OwnerImage extends Model
     public function images()
     {
         return $this->hasMany(Image::class, "id", "image_id");
+    }
+
+    /**
+     * 紐づくオーナー情報を取得する
+     *
+     * @return void
+     */
+    public function owner()
+    {
+        return $this->belongsTo(Owner::class, "owner_id", "id");
     }
 }

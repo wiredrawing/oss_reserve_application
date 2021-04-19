@@ -82,7 +82,12 @@ class GuestRequest extends BaseRequest
                     "option" => [
                         "nullable",
                         "string",
-                        "max:1024",
+                        "max:2048",
+                    ],
+                    "memo" => [
+                        "nullable",
+                        "string",
+                        "max:2048",
                     ]
                 ];
             } else if ($route_name === "api.front.guest.update") {
@@ -144,12 +149,12 @@ class GuestRequest extends BaseRequest
                     "option" => [
                         "nullable",
                         "string",
-                        "max:1024",
+                        "max:2048",
                     ],
                     "memo" => [
                         "nullable",
                         "string",
-                        "max:1024",
+                        "max:2048",
                     ]
                 ];
             }
