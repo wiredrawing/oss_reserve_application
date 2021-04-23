@@ -82,8 +82,7 @@ class ImageRequest extends BaseRequest
                         })
                     ]
                 ];
-            } else if ($route_name === "api.front.image.service") {
-                // 未削除の画像を削除する
+            } else if ($route_name === "api.front.image.service.add") {
                 $rules = [
                     "image_id" => [
                         "required",
@@ -111,8 +110,37 @@ class ImageRequest extends BaseRequest
                         }
                     ]
                 ];
-            } else if ($route_name === "api.front.image.owner") {
-                // 未削除の画像を削除する
+            } else if ($route_name === "api.front.image.service.delete") {
+                // serviceに紐付いた画像を削除
+                $rules = [
+                    "image_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("images", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                        })
+                    ],
+                    "service_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("services", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                        }),
+                        // duplication check
+                        function ($attribute, $value, $fail) {
+                            $number = ServiceImage::where([
+                                ["service_id", "=", $value],
+                                ["image_id", "=", $this->input("image_id")],
+                            ])->count();
+                            // if it is greater than 0, return an error message.
+                            if ($number !== 1) {
+                                // serviceと画像の紐付けがみつからない場合
+                                $fail("指定した画像はサービスに紐づけられていません｡");
+                            }
+                        }
+                    ]
+                ];
+            } else if ($route_name === "api.front.image.owner.add") {
                 $rules = [
                     "image_id" => [
                         "required",
@@ -140,10 +168,40 @@ class ImageRequest extends BaseRequest
                         }
                     ]
                 ];
+            } else if ($route_name === "api.front.image.owner.delete") {
+                // ownerに紐付いた画像を削除する
+                $rules = [
+                    "image_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("images", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                        })
+                    ],
+                    "owner_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("owners", "id")->where(function ($query) {
+                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                        }),
+                        // duplication check
+                        function ($attribute, $value, $fail) {
+                            $number = OwnerImage::where([
+                                ["owner_id", "=", $value],
+                                ["image_id", "=", $this->input("image_id")],
+                            ])->count();
+                            if ($number !== 1) {
+                                // ownerと画像の紐付けがみつからない場合
+                                $fail("指定した画像はオーナーに紐づけられていません｡");
+                            }
+                        }
+                    ]
+                ];
             }
+
         } else if ($method === "GET") {
 
-            if ($route_name === "api.front.image.owner") {
+            if ($route_name === "api.front.image.owner.list") {
                 $rules = [
                     "owner_id" => [
                         "required",
@@ -155,7 +213,7 @@ class ImageRequest extends BaseRequest
                         })
                     ]
                 ];
-            } else if ($route_name === "api.front.image.service") {
+            } else if ($route_name === "api.front.image.service.list") {
                 $rules = [
                     "service_id" => [
                         "required",

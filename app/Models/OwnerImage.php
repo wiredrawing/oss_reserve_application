@@ -21,9 +21,9 @@ class OwnerImage extends Model
      *
      * @return void
      */
-    public function images()
+    public function image()
     {
-        return $this->hasMany(Image::class, "id", "image_id");
+        return $this->hasOne(Image::class, "id", "image_id");
     }
 
     /**

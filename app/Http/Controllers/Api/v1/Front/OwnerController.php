@@ -21,7 +21,10 @@ class OwnerController extends Controller
     public function list(OwnerRequest $request)
     {
         try {
-            $owners = Owner::orderBy("id", "desc")
+            $owners = Owner::with([
+                "owner_images",
+                "owner_images.image",
+            ])->orderBy("id", "desc")
             ->get();
             $response = [
                 "status" => true,
@@ -85,7 +88,10 @@ class OwnerController extends Controller
         try {
             $update_data = $request->validated();
 
-            $owner = Owner::find($owner_id);
+            $owner = Owner::with([
+                "owner_images",
+                "owner_images.image",
+            ])->find($owner_id);
 
             if ($owner === NULL) {
                 throw new \Exception("指定したオーナー情報が見つかりませんでした｡");

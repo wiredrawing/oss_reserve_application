@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateServiceImagesTable extends Migration
+class CreateLikesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,22 +13,22 @@ class CreateServiceImagesTable extends Migration
      */
     public function up()
     {
-        Schema::create('service_images', function (Blueprint $table) {
-            $table->bigInteger("service_id");
+        Schema::create('likes', function (Blueprint $table) {
             $table->bigInteger("image_id");
+            $table->bigInteger("guest_id");
             $table->timestamps();
 
-            // primary key
+            // primary
             $table->primary([
-                "service_id",
                 "image_id",
+                "guest_id",
             ]);
 
             // unique
             $table->unique([
-                "service_id",
                 "image_id",
-            ], "service_images_service_id_image_id_unique");
+                "guest_id",
+            ], "likes_image_id_guest_id_unique");
         });
     }
 
@@ -39,6 +39,6 @@ class CreateServiceImagesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('service_images');
+        Schema::dropIfExists('likes');
     }
 }

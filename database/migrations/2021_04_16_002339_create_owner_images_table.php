@@ -14,11 +14,15 @@ class CreateOwnerImagesTable extends Migration
     public function up()
     {
         Schema::create('owner_images', function (Blueprint $table) {
-            $table->id();
             $table->bigInteger("owner_id");
             $table->bigInteger("image_id");
             $table->timestamps();
 
+            // primary key
+            $table->primary([
+                "owner_id",
+                "image_id",
+            ]);
             // unique
             $table->unique([
                 "owner_id",

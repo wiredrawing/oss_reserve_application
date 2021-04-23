@@ -145,6 +145,7 @@ class ServiceController extends Controller
                 "is_displayed" => Config("const.binary_type.on"),
                 "is_deleted" => Config("const.binary_type.off"),
             ])
+            ->orderBy("id", "desc")
             ->get();
             $response = [
                 "status" => true,

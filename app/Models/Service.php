@@ -61,7 +61,7 @@ class Service extends Model
         }
     }
 
-    public function owner_images ()
+    public function service_images ()
     {
         return $this->hasMany(ServiceImage::class, "service_id", "id");
     }

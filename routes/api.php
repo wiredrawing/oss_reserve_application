@@ -188,16 +188,47 @@ Route::group([
             "uses" => "ImageController@list",
         ]);
 
-        // owner情報に画像を紐付ける
-        Route::post("/owner", [
-            "as" => "owner",
-            "uses" => "ImageController@owner",
-        ]);
-        // service情報に画像を紐付ける
-        Route::post("/service", [
-            "as" => "service",
-            "uses" => "ImageController@service",
-        ]);
+        Route::group([
+            "prefix" => "owner",
+            "as" => "owner."
+        ], function () {
+            // owner情報に画像を紐付ける
+            Route::post("/", [
+                "as" => "add",
+                "uses" => "ImageController@owner",
+            ]);
+            // ownerに紐付いた画像を解除する
+            Route::post("/delete", [
+                "as" => "delete",
+                "uses" => "ImageController@owner_delete"
+            ]);
+            Route::get("/images/{owner_id}", [
+                "as" => "images",
+                "uses" => "ImageController@owner_images",
+            ]);
+        });
+
+
+        Route::group([
+            "prefix" => "service",
+            "as" => "service.",
+        ], function () {
+            // service情報に画像を紐付ける
+            Route::post("/", [
+                "as" => "add",
+                "uses" => "ImageController@service",
+            ]);
+            // serviceに紐付いた画像を解除する
+            Route::post("/delete", [
+                "as" => "delete",
+                "uses" => "ImageController@service_delete"
+            ]);
+            Route::get("/images/{service_id}", [
+                "as" => "images",
+                "uses" => "ImageController@service_images",
+            ]);
+        });
+
 
         Route::get("/show/{image_id}", [
             "as" => "show",

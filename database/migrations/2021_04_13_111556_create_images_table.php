@@ -21,8 +21,6 @@ class CreateImagesTable extends Migration
             $table->tinyInteger("is_deleted")->default(0);
             $table->string("filename", 512);
             $table->string("token", 512);
-            // 画像に対していいねできる
-            $table->bigInteger("good_count")->default(0);
             $table->timestamps();
             $table->unique("token", "image_token_unique");
             $table->unique("filename", "image_filename_unique");

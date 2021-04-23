@@ -33,9 +33,7 @@ class OwnerRequest extends BaseRequest
 
 
         if ($method === "GET") {
-            if ($route_name === "api.front.owner.list") {
-                $rules = [];
-            } else if ($route_name === "api.front.owner.detail") {
+            if ($route_name === "api.front.owner.detail") {
                 $rules = [
                     "owner_id" => [
                         "required",

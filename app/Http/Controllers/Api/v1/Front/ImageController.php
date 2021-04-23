@@ -119,10 +119,39 @@ class ImageController extends Controller
         }
     }
 
+    /**
+     * 指定したServiceに紐付いた画像一覧を取得する
+     *
+     * @param ImageRequest $request
+     * @param integer $service_id
+     * @return void
+     */
+    public function service_images(ImageRequest $request, int $service_id)
+    {
+        try {
+            $images = ServiceImage::where([
+                ["service_id", "=", $service_id],
+            ])
+            ->get();
 
+            logger()->error($e);
+            $response = [
+                "status" => true,
+                "data" => $images,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
 
     /**
-     * オーナー基準の画像一覧を取得する
+     * Ownerと画像情報を紐付ける
      *
      * @param ImageRequest $request
      * @return void
@@ -152,6 +181,41 @@ class ImageController extends Controller
 
 
     /**
+     * 指定したオーナーに紐付いた画像一覧を取得する
+     *
+     * @param ImageRequest $request
+     * @param integer $owner_id
+     * @return void
+     */
+    public function owner_images(ImageRequest $request, int $owner_id)
+    {
+        try {
+            $images = OwnerImage::with([
+                "owner",
+            ])->where([
+                ["owner_id", "=", $owner_id],
+            ])
+            ->orderBy("id", "desc")
+            ->get();
+
+            logger()->info($images);
+
+            $response = [
+                "status" => true,
+                "data" => $images,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
+
+    /**
      * 指定した画像IDを表示する
      *
      * @param ImageRequest $request
@@ -161,7 +225,11 @@ class ImageController extends Controller
     public function show(ImageRequest $request, int $image_id)
     {
         try {
-            $image = Image::find($image_id);
+            $image = Image::where([
+                ["is_displayed", "=", Config("const.binary_type")["on"]],
+                ["is_deleted", "=", Config("const.binary_type")["off"]],
+            ])->find($image_id);
+
             if ($image === NULL) {
                 throw new \Exception("指定した画像が見つかりません｡");
             }
