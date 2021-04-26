@@ -104,6 +104,9 @@ class ServiceController extends Controller
         try {
             $service = Service::with([
                 "reserves",
+                "service_images",
+                "service_images.image",
+                "owner",
             ])
             ->where("is_displayed", Config("const.binary_type.on"))
             ->where("is_deleted", Config("const.binary_type.off"))
@@ -141,6 +144,8 @@ class ServiceController extends Controller
             $services = Service::with([
                 "reserves",
                 "owner",
+                "service_images",
+                "service_images.image",
             ])->where([
                 "is_displayed" => Config("const.binary_type.on"),
                 "is_deleted" => Config("const.binary_type.off"),

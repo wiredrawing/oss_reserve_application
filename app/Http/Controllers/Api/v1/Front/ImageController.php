@@ -446,4 +446,70 @@ class ImageController extends Controller
             throw new \Exception($e->getMessage());
         }
     }
+
+    /**
+     * オーナーに紐付いた画像を削除する
+     *
+     * @param ImageRequest $request
+     * @return void
+     */
+    public function owner_delete(ImageRequest $request)
+    {
+        try {
+            $post_data = $request->validated();
+
+            $image = OwnerImage::where([
+                ["owner_id", "=", $post_data["owner_id"]],
+                ["image_id", "=", $post_data["image_id"]],
+            ])
+            ->get()
+            ->first();
+            $result = $image->delete();
+            $response = [
+                "status" => true,
+                "data" => $image,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
+
+    /**
+     * サービスにに紐付いた画像を削除する
+     *
+     * @param ImageRequest $request
+     * @return void
+     */
+    public function service_delete(ImageRequest $request)
+    {
+        try {
+            $post_data = $request->validated();
+
+            $image = ServiceImage::where([
+                ["service_id", "=", $post_data["service_id"]],
+                ["image_id", "=", $post_data["image_id"]],
+            ])
+            ->get()
+            ->first();
+            $result = $image->delete();
+            $response = [
+                "status" => true,
+                "data" => $image,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
 }

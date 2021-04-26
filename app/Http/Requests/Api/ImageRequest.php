@@ -67,7 +67,7 @@ class ImageRequest extends BaseRequest
                         Rule::exists("images", "id")->where(function ($query) {
                             $query
                             ->where("is_displayed", Config("const.binary_type")["on"])
-                            ->where("is_deleted", Config("const.binary_type")["off"]);
+                            ->where("is_deleted", Config("const.binary_type.off"));
                         })
                     ]
                 ];
@@ -78,7 +78,7 @@ class ImageRequest extends BaseRequest
                         "required",
                         "integer",
                         Rule::exists("images", "id")->where(function ($query) {
-                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                            $query->where("is_deleted", Config("const.binary_type.off"));
                         })
                     ]
                 ];
@@ -88,14 +88,14 @@ class ImageRequest extends BaseRequest
                         "required",
                         "integer",
                         Rule::exists("images", "id")->where(function ($query) {
-                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                            $query->where("is_deleted", Config("const.binary_type.off"));
                         })
                     ],
                     "service_id" => [
                         "required",
                         "integer",
                         Rule::exists("services", "id")->where(function ($query) {
-                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                            $query->where("is_deleted", Config("const.binary_type.off"));
                         }),
                         // duplication check
                         function ($attribute, $value, $fail) {
@@ -117,14 +117,14 @@ class ImageRequest extends BaseRequest
                         "required",
                         "integer",
                         Rule::exists("images", "id")->where(function ($query) {
-                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                            $query->where("is_deleted", Config("const.binary_type.off"));
                         })
                     ],
                     "service_id" => [
                         "required",
                         "integer",
                         Rule::exists("services", "id")->where(function ($query) {
-                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                            $query->where("is_deleted", Config("const.binary_type.off"));
                         }),
                         // duplication check
                         function ($attribute, $value, $fail) {
@@ -146,14 +146,14 @@ class ImageRequest extends BaseRequest
                         "required",
                         "integer",
                         Rule::exists("images", "id")->where(function ($query) {
-                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                            $query->where("is_deleted", Config("const.binary_type.off"));
                         })
                     ],
                     "owner_id" => [
                         "required",
                         "integer",
                         Rule::exists("owners", "id")->where(function ($query) {
-                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                            $query->where("is_deleted", Config("const.binary_type.off"));
                         }),
                         // duplication check
                         function ($attribute, $value, $fail) {
@@ -175,14 +175,14 @@ class ImageRequest extends BaseRequest
                         "required",
                         "integer",
                         Rule::exists("images", "id")->where(function ($query) {
-                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                            $query->where("is_deleted", Config("const.binary_type.off"));
                         })
                     ],
                     "owner_id" => [
                         "required",
                         "integer",
                         Rule::exists("owners", "id")->where(function ($query) {
-                            $query->where("is_deleted", Config("const.binary_type")["off"]);
+                            $query->where("is_deleted", Config("const.binary_type.off"));
                         }),
                         // duplication check
                         function ($attribute, $value, $fail) {
@@ -209,7 +209,7 @@ class ImageRequest extends BaseRequest
                         Rule::exists("owners", "id")->where(function ($query) {
                             $query
                             ->where("is_displayed", Config("const.binary_type")["on"])
-                            ->where("is_deleted", Config("const.binary_type")["off"]);
+                            ->where("is_deleted", Config("const.binary_type.off"));
                         })
                     ]
                 ];
@@ -221,7 +221,7 @@ class ImageRequest extends BaseRequest
                         Rule::exists("services", "id")->where(function ($query) {
                             $query
                             ->where("is_displayed", Config("const.binary_type")["on"])
-                            ->where("is_deleted", Config("const.binary_type")["off"]);
+                            ->where("is_deleted", Config("const.binary_type.off"));
                         })
                     ]
                 ];
@@ -233,7 +233,7 @@ class ImageRequest extends BaseRequest
                         Rule::exists("images", "id")->where(function ($query) {
                             $query
                             ->where("is_displayed", Config("const.binary_type")["on"])
-                            ->where("is_deleted", Config("const.binary_type")["off"]);
+                            ->where("is_deleted", Config("const.binary_type.off"));
                         })
                     ]
                 ];

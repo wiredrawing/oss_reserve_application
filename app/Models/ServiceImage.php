@@ -7,11 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class ServiceImage extends Model
 {
 
+    use \LaravelTreats\Model\Traits\HasCompositePrimaryKey;
+
+    protected $primaryKey = [
+        "service_id",
+        "image_id",
+    ];
 
     protected $fillable = [
         "service_id",
         "image_id",
     ];
+
+    public $incrementing = false;
 
 
     /**
@@ -24,4 +32,13 @@ class ServiceImage extends Model
         return $this->hasOne(Image::class, "id", "image_id");
     }
 
+    /**
+     * 紐づくサービス情報を取得する
+     *
+     * @return void
+     */
+    public function service()
+    {
+        return $this->belongsTo(Service::class, "serivce_id", "id");
+    }
 }

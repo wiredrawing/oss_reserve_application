@@ -15,6 +15,7 @@
         "intervention/image": "^2.5",
         "laravel/framework": "^7.29",
         "laravel/tinker": "^2.5",
+        "mopo922/laravel-treats": "^2.0",
         "stripe/stripe-php": "^7.76"
     },
     "require-dev": {

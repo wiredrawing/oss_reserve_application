@@ -7,14 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class OwnerImage extends Model
 {
 
+    use \LaravelTreats\Model\Traits\HasCompositePrimaryKey;
 
+    protected $primaryKey = [
+        "owner_id",
+        "image_id",
+    ];
 
     protected $fillable = [
         "owner_id",
         "image_id",
     ];
 
-
+    public $incrementing = false;
 
     /**
      * 紐づく画像一覧を取得する
