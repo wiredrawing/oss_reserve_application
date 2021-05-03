@@ -216,13 +216,14 @@ class ImageController extends Controller
     }
 
     /**
-     * 指定した画像IDを表示する
+     * 指定した画像IDを表示する (URLにはその画像独自のユニークなトークンを必須とする)
      *
      * @param ImageRequest $request
      * @param integer $image_id
+     * @param string $token
      * @return void
      */
-    public function show(ImageRequest $request, int $image_id)
+    public function show(ImageRequest $request, int $image_id, string $token)
     {
         try {
             $image = Image::where([

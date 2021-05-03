@@ -25,7 +25,8 @@ class Image extends Model
     public function getShowUrlAttribute()
     {
         return action("Api\\v1\\Front\\ImageController@show", [
-            "image_id" => $this->id
+            "image_id" => $this->id,
+            "token" => $this->token,
         ]);
     }
 }

@@ -39,6 +39,6 @@ class ServiceImage extends Model
      */
     public function service()
     {
-        return $this->belongsTo(Service::class, "serivce_id", "id");
+        return $this->belongsTo(Service::class, "service_id", "id");
     }
 }

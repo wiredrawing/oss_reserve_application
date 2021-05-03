@@ -232,9 +232,14 @@ class ImageRequest extends BaseRequest
                         "integer",
                         Rule::exists("images", "id")->where(function ($query) {
                             $query
+                            ->where("token", $this->route()->parameter("token"))
                             ->where("is_displayed", Config("const.binary_type")["on"])
                             ->where("is_deleted", Config("const.binary_type.off"));
                         })
+                    ],
+                    "token" => [
+                        "required",
+                        "string",
                     ]
                 ];
             } else if ($route_name === "api.front.image.list") {

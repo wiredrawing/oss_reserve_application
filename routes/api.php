@@ -230,7 +230,7 @@ Route::group([
         });
 
 
-        Route::get("/show/{image_id}", [
+        Route::get("/show/{image_id}/{token}", [
             "as" => "show",
             "uses" => "ImageController@show",
         ]);
