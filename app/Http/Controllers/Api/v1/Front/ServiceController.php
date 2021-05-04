@@ -108,8 +108,10 @@ class ServiceController extends Controller
                 "service_images.image",
                 "owner",
             ])
-            ->where("is_displayed", Config("const.binary_type.on"))
-            ->where("is_deleted", Config("const.binary_type.off"))
+            ->where([
+                ["is_displayed", "=", Config("const.binary_type.on")],
+                ["is_deleted", "=", Config("const.binary_type.off")]
+            ])
             ->find($service_id);
 
             if ($service === NULL) {
@@ -147,8 +149,8 @@ class ServiceController extends Controller
                 "service_images",
                 "service_images.image",
             ])->where([
-                "is_displayed" => Config("const.binary_type.on"),
-                "is_deleted" => Config("const.binary_type.off"),
+                ["is_displayed", "=", Config("const.binary_type.on")],
+                ["is_deleted", "=", Config("const.binary_type.off")],
             ])
             ->orderBy("id", "desc")
             ->get();

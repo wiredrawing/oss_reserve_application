@@ -60,7 +60,9 @@ class GuestController extends Controller
             $token = RandomToken::MakeRandomToken(64);
 
             // このランダムトークンと重複していないかをDBで調べる
-            $guest = Guest::where("token", $token)->get()->first();
+            $guest = Guest::where([
+                ["token", "=", $token]
+            ])->get()->first();
 
             // トークンの生成に失敗
             if ($guest !== NULL) {
@@ -148,8 +150,10 @@ class GuestController extends Controller
     public function detail(GuestRequest $request, int $guest_id)
     {
         try {
-            $guest = Guest::where("is_displayed", Config("const.binary_type.on"))
-            ->where("is_deleted", Config("const.binary_type.off"))
+            $guest = Guest::where([
+                ["is_displayed", "=", Config("const.binary_type.on")],
+                ["is_deleted", "=", Config("const.binary_type.off")],
+            ])
             ->find($guest_id);
 
             // ゲスト情報の存在チェック

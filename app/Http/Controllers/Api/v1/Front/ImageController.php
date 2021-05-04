@@ -227,8 +227,8 @@ class ImageController extends Controller
     {
         try {
             $image = Image::where([
-                ["is_displayed", "=", Config("const.binary_type")["on"]],
-                ["is_deleted", "=", Config("const.binary_type")["off"]],
+                ["is_displayed", "=", Config("const.binary_type.on")],
+                ["is_deleted", "=", Config("const.binary_type.off")],
             ])->find($image_id);
 
             if ($image === NULL) {
@@ -336,8 +336,8 @@ class ImageController extends Controller
     {
         try {
             $image = Image::where([
-                ["is_deleted", "=", Config("const.binary_type")["off"]],
-                ["is_displayed", "=", Config("const.binary_type")["off"]],
+                ["is_displayed", "=", Config("const.binary_type.on")],
+                ["is_deleted", "=", Config("const.binary_type.off")],
             ])
             ->find($image_id);
 
@@ -413,8 +413,8 @@ class ImageController extends Controller
             }
 
             // 新規挿入データをフォーマット
-            $post_data["is_displayed"] = Config("const.binary_type")["on"];
-            $post_data["is_deleted"] = Config("const.binary_type")["off"];
+            $post_data["is_displayed"] = Config("const.binary_type.on");
+            $post_data["is_deleted"] = Config("const.binary_type.off");
             $post_data["token"] = $token;
             $post_data["filename"] = $filename;
 
