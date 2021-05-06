@@ -34,4 +34,30 @@ class UtilityController extends Controller
             return response()->json($response);
         }
     }
+
+    /**
+     * 予約可能な曜日一覧を取得する
+     *
+     * @param UtilityRequest $request
+     * @return void
+     */
+    public function reservable_dates(UtilityRequest $request)
+    {
+        try {
+            $reservable_dates = Config("const.reservable_dates");
+
+            $response = [
+                "status" => true,
+                "data" => $reservable_dates,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
 }

@@ -31,4 +31,22 @@ return [
         // 同一ディレクトリ内に保存できるファイル数
         "directory_max" => 20000,
     ],
+
+    // 予約可能な曜日一覧
+    "reservable_dates" => [
+        ["index" => "0", "data" => "日曜日"],
+        ["index" => "1", "data" => "月曜日"],
+        ["index" => "2", "data" => "火曜日"],
+        ["index" => "3", "data" => "水曜日"],
+        ["index" => "4", "data" => "木曜日"],
+        ["index" => "5", "data" => "金曜日"],
+        ["index" => "6", "data" => "土曜日"]
+    ],
+    "hours" => (function () {
+        $hour_range = range(0, 23);
+        foreach ($hour_range as $key => $value) {
+            var_dump($value);
+        }
+        return [];
+    })(),
 ];

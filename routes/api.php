@@ -33,6 +33,10 @@ Route::group([
             "as" => "service_type",
             "uses" => "UtilityController@service_type"
         ]);
+        Route::get("/reservable_dates", [
+            "as" => "reservable_dates",
+            "uses" => "UtilityController@reservable_dates",
+        ]);
     });
 
     // オーナー情報関連
