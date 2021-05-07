@@ -71,7 +71,21 @@ class ServiceRequest extends BaseRequest
                     "service_type" => [
                         "required",
                         "integer",
-                    ]
+                        Rule::in(array_column(Config("const.service_types"), "index"))
+                    ],
+                    "reservable_times" => [
+                        "required",
+                        "array",
+                    ],
+                    "reservable_times.*.reservable_date" => [
+                        // 予約可能曜日
+                    ],
+                    "reservable_times.*.reservable_from" => [
+                        // 予約可能開始時間
+                    ],
+                    "reservable_times.*.reservable_to" => [
+                        // 予約可能終了時間
+                    ],
                 ];
             } else if ($route_name === "api.front.service.update") {
                 $rules = [

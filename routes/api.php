@@ -37,6 +37,14 @@ Route::group([
             "as" => "reservable_dates",
             "uses" => "UtilityController@reservable_dates",
         ]);
+        Route::get("/reservable_hours", [
+            "as" => "reservable_hours",
+            "uses" => "UtilityController@reservable_hours",
+        ]);
+        Route::get("/reservable_minutes", [
+            "as" => "reservable_minutes",
+            "uses" => "UtilityController@reservable_minutes",
+        ]);
     });
 
     // オーナー情報関連

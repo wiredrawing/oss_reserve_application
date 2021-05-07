@@ -60,4 +60,56 @@ class UtilityController extends Controller
             return response()->json($response);
         }
     }
+
+    /**
+     * 予約可能な時一覧を取得する
+     *
+     * @param UtilityRequest $request
+     * @return void
+     */
+    public function reservable_hours(UtilityRequest $request)
+    {
+        try {
+            $reservable_hours = Config("const.reservable_hours");
+
+            $response = [
+                "status" => true,
+                "data" => $reservable_hours,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
+
+    /**
+     * 予約可能な分一覧を取得する
+     *
+     * @param UtilityRequest $request
+     * @return void
+     */
+    public function reservable_minutes(UtilityRequest $request)
+    {
+        try {
+            $reservable_minutes = Config("const.reservable_minutes");
+
+            $response = [
+                "status" => true,
+                "data" => $reservable_minutes,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
 }
