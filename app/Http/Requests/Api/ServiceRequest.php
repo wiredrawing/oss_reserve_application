@@ -209,7 +209,9 @@ class ServiceRequest extends BaseRequest
         ];
         foreach ($this->input("reservable_times") as $key => $value) {
             foreach ($value as $inner_key => $inner_value) {
-                $attributes["reservable_times.{$key}.{$inner_key}"] = "{$key}番目の{$attributes[$inner_key]}";
+                if (isset($attributes[$inner_key])) {
+                    $attributes["reservable_times.{$key}.{$inner_key}"] = "{$key}番目の{$attributes[$inner_key]}";
+                }
             }
         }
         return $attributes;

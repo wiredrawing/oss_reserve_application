@@ -29,6 +29,10 @@ class CreateReservableTimesTable extends Migration
             $table->time("reservable_from");
             // 予約可能終了時間
             $table->time("reservable_to");
+            // 予約可能日時に関しての注意事項
+            $table->text("memo")->nullable();
+            // 管理者側の注意事項
+            $table->text("memo_for_admin")->nullable();
             $table->timestamps();
 
             // is_enabledと同等
