@@ -22,14 +22,15 @@ class CreateGuestsTable extends Migration
             $table->string("family_name_sort", 512);
             $table->string("given_name_sort", 512);
             $table->string("email", 512);
+            $table->string("password", 512);
             $table->string("phone_number", 512);
             $table->string("token", 512);
             // ユーザー側の使う備考欄
-            $table->text("option")->nullable();
-            // 管理側が使う備考欄
             $table->text("memo")->nullable();
-            $table->tinyInteger("is_displayed")->default(1);
-            $table->tinyInteger("is_deleted")->default(0);
+            // 管理側が使う備考欄
+            $table->text("memo_for_admin")->nullable();
+            $table->tinyInteger("is_displayed")->default(Config("const.binary_type.on"));
+            $table->tinyInteger("is_deleted")->default(Config("const.binary_type.off"));
             // 電話問い合わによる登録の場合
             $table->integer("created_by")->nullable();
             // 情報更新者

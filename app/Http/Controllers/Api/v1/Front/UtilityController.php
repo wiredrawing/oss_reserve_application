@@ -41,14 +41,14 @@ class UtilityController extends Controller
      * @param UtilityRequest $request
      * @return void
      */
-    public function reservable_dates(UtilityRequest $request)
+    public function reservable_days(UtilityRequest $request)
     {
         try {
-            $reservable_dates = Config("const.reservable_dates");
+            $reservable_days = Config("const.reservable_days");
 
             $response = [
                 "status" => true,
-                "data" => $reservable_dates,
+                "data" => $reservable_days,
             ];
             return response()->json($response);
         } catch (\Throwable $e) {

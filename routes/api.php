@@ -33,9 +33,9 @@ Route::group([
             "as" => "service_type",
             "uses" => "UtilityController@service_type"
         ]);
-        Route::get("/reservable_dates", [
-            "as" => "reservable_dates",
-            "uses" => "UtilityController@reservable_dates",
+        Route::get("/reservable_days", [
+            "as" => "reservable_days",
+            "uses" => "UtilityController@reservable_days",
         ]);
         Route::get("/reservable_hours", [
             "as" => "reservable_hours",

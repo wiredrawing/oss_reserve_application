@@ -15,10 +15,11 @@ class Guest extends Model
         "family_name_sort",
         "given_name_sort",
         "email",
+        "password",
         "phone_number",
         "token",
-        "option",
         "memo",
+        "memo_for_admin",
         "is_displayed",
         "is_deleted",
         // 作成者

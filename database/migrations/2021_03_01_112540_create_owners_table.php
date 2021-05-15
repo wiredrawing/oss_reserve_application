@@ -25,6 +25,8 @@ class CreateOwnersTable extends Migration
             $table->string("phone_number", 16);
             $table->text("description")->nullable();
             $table->text("memo")->nullable();
+            // 当該オーナーを管理する管理者ID
+            $table->unsignedBigInteger("administrator_id");
             $table->tinyInteger("is_displayed")->default(0);
             $table->tinyInteger("is_deleted")->default(0);
             $table->timestamps();

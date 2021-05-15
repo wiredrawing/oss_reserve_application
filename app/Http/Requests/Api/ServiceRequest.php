@@ -77,10 +77,10 @@ class ServiceRequest extends BaseRequest
                         "required",
                         "array",
                     ],
-                    "reservable_times.*.reservable_date" => [
+                    "reservable_times.*.reservable_day" => [
                         "required",
                         "integer",
-                        Rule::in(array_column(Config("const.reservable_dates"), "index")),
+                        Rule::in(array_column(Config("const.reservable_days"), "index")),
                     ],
                     "reservable_times.*.reservable_from" => [
                         // 予約可能開始時間
@@ -199,7 +199,7 @@ class ServiceRequest extends BaseRequest
             "price" => "一括単価",
             "price_per_hour" => "時間給",
             "capacity" => "収容人数",
-            "reservable_date" => "予約可能曜日",
+            "reservable_day" => "予約可能曜日",
             "reservable_from" => "指定曜日に可能な予約開始時間",
             "reservable_to" => "指定曜日に可能な予約終了時間",
             "reservable_from_hour" => "-",

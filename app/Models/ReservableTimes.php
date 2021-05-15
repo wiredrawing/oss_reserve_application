@@ -11,7 +11,7 @@ class ReservableTimes extends Model
 
     protected $fillable = [
         "service_id",
-        "reservable_date",
+        "reservable_day",
         "reservable_from",
         "reservable_to",
         "memo",

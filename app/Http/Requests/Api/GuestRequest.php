@@ -71,7 +71,7 @@ class GuestRequest extends BaseRequest
                         }
                     ],
                     "password" => [
-                        "nullable",
+                        "required",
                         "string",
                         "between:10,72"
                     ],
@@ -79,12 +79,12 @@ class GuestRequest extends BaseRequest
                         "required",
                         new PhoneNumber(),
                     ],
-                    "option" => [
+                    "memo" => [
                         "nullable",
                         "string",
                         "max:2048",
                     ],
-                    "memo" => [
+                    "memo_for_admin" => [
                         "nullable",
                         "string",
                         "max:2048",
@@ -146,12 +146,12 @@ class GuestRequest extends BaseRequest
                         "required",
                         new PhoneNumber(),
                     ],
-                    "option" => [
+                    "memo" => [
                         "nullable",
                         "string",
                         "max:2048",
                     ],
-                    "memo" => [
+                    "memo_for_admin" => [
                         "nullable",
                         "string",
                         "max:2048",

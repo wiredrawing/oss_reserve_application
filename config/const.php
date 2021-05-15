@@ -17,6 +17,7 @@ return [
 
     // レンタルする対象のサービス名
     "service_types" => [
+        ["index" => 0   , "data" => "ー"],
         ["index" => 1   , "data" => "不動産"],
         ["index" => 2   , "data" => "高額商品"],
         ["index" => 3   , "data" => "自動車･バイク･自転車"],
@@ -24,6 +25,7 @@ return [
         ["index" => 100 , "data" => "その他"],
     ],
     "service_type_names" => [
+        "none"              => 0, // 未設定
         "real_estate"       => 1, // 不動産
         "expensive_product" => 2, // 高額商品
         "vehicle"           => 3, // 乗り物全般
@@ -39,14 +41,15 @@ return [
     ],
 
     // 予約可能な曜日一覧
-    "reservable_dates" => [
-        ["index" => 0, "data" => "日曜日"],
-        ["index" => 1, "data" => "月曜日"],
-        ["index" => 2, "data" => "火曜日"],
-        ["index" => 3, "data" => "水曜日"],
-        ["index" => 4, "data" => "木曜日"],
-        ["index" => 5, "data" => "金曜日"],
-        ["index" => 6, "data" => "土曜日"]
+    "reservable_days" => [
+        ["index" => 0, "data" => "ー"],
+        ["index" => 1, "data" => "日曜日"],
+        ["index" => 2, "data" => "月曜日"],
+        ["index" => 3, "data" => "火曜日"],
+        ["index" => 4, "data" => "水曜日"],
+        ["index" => 5, "data" => "木曜日"],
+        ["index" => 6, "data" => "金曜日"],
+        ["index" => 7, "data" => "土曜日"]
     ],
     "reservable_hours" => (function () {
         $hours = [];

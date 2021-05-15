@@ -19,6 +19,7 @@ class OwnersTableSeeder extends Seeder
             "phone_number" => "090-1234-5678",
             "description" => "description => seederから作成",
             "memo" => "memo => seederから作成",
+            "administrator_id" => 1,
         ]);
     }
 }

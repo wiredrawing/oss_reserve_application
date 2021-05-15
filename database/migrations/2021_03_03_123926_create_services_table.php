@@ -33,6 +33,8 @@ class CreateServicesTable extends Migration
             // 一時的に予約不可にする場合
             $table->tinyInteger("is_displayed")->default(1);
             $table->tinyInteger("is_deleted")->default(0);
+            // 当該サービスに関する商品説明(ウィジウィグエディタで編集)
+            $table->text("service_contents")->nullable();
             $table->integer("created_by")->nullable();
             $table->integer("updated_by")->nullable();
             $table->timestamps();

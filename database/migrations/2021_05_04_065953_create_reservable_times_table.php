@@ -24,7 +24,7 @@ class CreateReservableTimesTable extends Migration
             // 4 => "木曜日",
             // 5 => "金曜日",
             // 6 => "土曜日"
-            $table->tinyInteger("reservable_date");
+            $table->tinyInteger("reservable_day");
             // 予約可能開始時間
             $table->time("reservable_from");
             // 予約可能終了時間
@@ -41,7 +41,7 @@ class CreateReservableTimesTable extends Migration
 
             $table->unique([
                 "service_id",
-                "reservable_date",
+                "reservable_day",
                 "reservable_from",
                 "reservable_to",
             ], "reservable_times_unique");

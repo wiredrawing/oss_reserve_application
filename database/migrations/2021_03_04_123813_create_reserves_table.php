@@ -28,7 +28,8 @@ class CreateReservesTable extends Migration
             // 予約申請者はguestテーブルに登録すること
             $table->foreign("guest_id")->references("id")->on("guests");
             $table->text("memo")->nullable();
-            $table->tinyInteger("is_canceled")->default(0);
+            $table->text("memo_for_admin")->nullable();
+            $table->tinyInteger("is_canceled")->default(Config("const.binary_type.off"));
             $table->integer("created_by")->nullable();
             $table->integer("updated_by")->nullable();
 
