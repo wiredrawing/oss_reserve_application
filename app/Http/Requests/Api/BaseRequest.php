@@ -48,10 +48,16 @@ class BaseRequest extends FormRequest
             "status" => false,
             "data" => $validator->errors()
         ];
+        // throw new HttpResponseException(
+        //     response()->json(
+        //         $response,
+        //         // $validator->errors()->getMessages(),
+        //         200
+        //     )
+        // );
         throw new HttpResponseException(
             response()->json(
                 $response,
-                // $validator->errors()->getMessages(),
                 200
             )
         );

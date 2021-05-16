@@ -6,12 +6,39 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ServiceRequest;
 use App\Models\Service;
 use App\Models\Reserve;
+use App\Models\ReservableTime;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class ServiceController extends Controller
 {
 
+
+    /**
+     * サービス情報の入力内容検証
+     *
+     * @param ServiceRequest $request
+     * @return void
+     */
+    public function check (ServiceRequest $request)
+    {
+        try {
+            $post_data = $request->validated();
+            $response = [
+                "status" => true,
+                "data" => $post_data,
+            ];
+            return response()->json($response);
+        } catch (\Throwable $e) {
+            DB::rollback();
+            logger()->error($e);
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
 
     /**
      * 新規サービスの登録処理
@@ -22,10 +49,37 @@ class ServiceController extends Controller
     public function create (ServiceRequest $request)
     {
         try {
+            DB::beginTransaction();
+
             $post_data = $request->validated();
 
             // 新規サービス登録
             $service = Service::create($post_data);
+            $service_id = $service->id;
+
+            // 親テーブルのservicesへのinsertチェック
+            if ($service === NULL) {
+                throw new \Exception ("service情報の登録に失敗しました｡");
+            }
+
+            // 予約可能時間帯を登録する
+            $reservable_times = $post_data["reservable_times"];
+            foreach ($reservable_times as $key => $value) {
+                $value["service_id"] = $service_id;
+                $reservable_time = ReservableTime::create($value);
+            }
+
+            // 2つのテーブルへsqlクエリが完了したら､$service_idを元に､レコードを再度取得する
+
+            $service = Service::with([
+                "reservable_times"
+            ])
+            ->find($service_id);
+            if ($service === NULL) {
+                throw new \Exception("サービス情報の登録に失敗しました｡");
+            }
+
+            DB::commit();
 
             $response = [
                 "status" => true,
@@ -33,6 +87,7 @@ class ServiceController extends Controller
             ];
             return response()->json($response);
         } catch (\Throwable $e) {
+            DB::rollback();
             logger()->error($e);
             $response = [
                 "status" => false,
@@ -53,10 +108,11 @@ class ServiceController extends Controller
     public function update (ServiceRequest $request, int $service_id)
     {
         try {
+            DB::beginTransaction();
+
             $post_data = $request->validated();
 
-            DB::beginTransaction();
-            // 更新対象のレコード取得
+            // 排他ロックでレコードを取得する
             $service = Service::lockForUpdate()
             ->where("id", $service_id)
             ->get()
@@ -67,13 +123,29 @@ class ServiceController extends Controller
                 throw new \Exception("指定したサービス情報が見つかりません｡");
             }
 
-            // レコードの更新処理
+            // 親のサービス情報を更新
             $result = $service->fill($post_data)->save();
 
             // SQLクエリの成功可否
             if ($result !== true) {
                 throw new \Exception("指定したサービス情報のアップデートに失敗しました｡");
             }
+
+            // サブテーブルのreservable_timesテーブルを更新
+            // 同サービスの予約可能時間を削除
+            $reservable_times = ReservableTime::where([
+                ["service_id", "=", $service->id]
+            ])
+            ->delete();
+            $reservable_times = $post_data["reservable_times"];
+            foreach ($reservable_times as $key => $value) {
+                $value["service_id"] = $service->id;
+                $reservable_time = ReservableTime::create($value);
+                if ($reservable_time === NULL) {
+                    throw new \Exception("予約可能時間の登録に失敗しました｡");
+                }
+            }
+
 
             DB::commit();
             $response = [
@@ -107,6 +179,7 @@ class ServiceController extends Controller
                 "service_images",
                 "service_images.image",
                 "owner",
+                "reservable_times",
             ])
             ->where([
                 ["is_displayed", "=", Config("const.binary_type.on")],
@@ -252,6 +325,26 @@ class ServiceController extends Controller
                 "data" => $duplicated_reservation,
             ];
             return response()->json($response);
+        } catch (\Throwable $e) {
+            $response = [
+                "status" => false,
+                "data" => $e->getMessage(),
+            ];
+            return response()->json($response);
+        }
+    }
+
+    /**
+     * 特定の日付は､予約不可能にする(臨時休業など)
+     *
+     * @param ServiceRequest $request
+     * @param integer $service_id
+     * @return void
+     */
+    public function exclude_date(ServiceRequest $request, int $service_id)
+    {
+        try {
+
         } catch (\Throwable $e) {
             $response = [
                 "status" => false,

@@ -15,12 +15,14 @@ class CreatePaymentsTable extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger("guest_id");
             // 支払い先の予約情報
-            $table->bigInteger("reserve_id");
+            $table->unsignedBigInteger("reserve_id");
             // 一回の合計支払い金額
-            $table->bigInteger("amount");
+            $table->unsignedBigInteger("amount");
             $table->text("memo");
+            $table->text("memo_for_admin");
+            // 支払い確定日
+            $table->dateTime("paid_at");
             $table->timestamps();
         });
     }

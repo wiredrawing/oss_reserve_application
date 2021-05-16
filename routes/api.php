@@ -85,6 +85,10 @@ Route::group([
             "as" => "create",
             "uses" => "GuestController@create",
         ]);
+        Route::post("/check", [
+            "as" => "check",
+            "uses" => "GuestController@check",
+        ]);
         // 指定したゲスト情報を更新する
         Route::post("/{guest_id}/update", [
             "as" => "update",
@@ -147,6 +151,11 @@ Route::group([
             "as" => "create",
             "uses" => "ServiceController@create"
         ]);
+        // サービス情報の入力内容の検証API
+        Route::post("/check", [
+            "as" => "check",
+            "uses" => "ServiceController@check"
+        ]);
         // 既存サービスの更新処理
         Route::post("/update/{service_id}", [
             "as" => "update",
@@ -175,6 +184,11 @@ Route::group([
         Route::get("/detail/{service_id}", [
             "as" => "detail",
             "uses" => "ServiceController@detail"
+        ]);
+        // 指定した日時を臨時休業とする
+        Route::post("/exclude_date", [
+            "as" => "exclude_date",
+            "uses" => "ServiceController@exclude_date",
         ]);
     });
 

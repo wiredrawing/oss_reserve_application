@@ -16,7 +16,6 @@ class ServicesTableSeeder extends Seeder
             "owner_id" => 1,
             "memo" => "メモ",
             "capacity" => 1,
-            "price" => 25000,
             "price_per_hour" => 2500,
             "service_type" => 1,
             "is_displayed" => 1,

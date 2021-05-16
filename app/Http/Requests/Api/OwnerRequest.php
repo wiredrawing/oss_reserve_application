@@ -46,6 +46,18 @@ class OwnerRequest extends BaseRequest
                 ];
             }
         } else if ($method === "POST") {
+            /*
+                {
+                    "owner_name": "オーナーネーム",
+                    "owner_name_sort": "オーナーネームよみ",
+                    "family_name_sort": "ファミリーネーム",
+                    "given_name_sort": "ギブンネーム",
+                    "email": "dummy@gmail.com",
+                    "phone_number": "080-1111-2222",
+                    "password": "AAAAaaa1234",
+                    "administrator_id": 1,
+                }
+            */
             if ($route_name === "api.front.owner.create") {
                 $rules = [
                     "owner_name" => [
@@ -77,6 +89,16 @@ class OwnerRequest extends BaseRequest
                         "nullable",
                         "string",
                         "between:0,2048",
+                    ],
+                    "memo_for_admin" => [
+                        "nullable",
+                        "string",
+                        "between:0,2048",
+                    ],
+                    "administrator_id" => [
+                        "required",
+                        "integer",
+                        Rule::exists("administrators", "id")
                     ]
                 ];
             } else if ($route_name === "api.front.owner.update") {

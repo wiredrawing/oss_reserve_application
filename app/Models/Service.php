@@ -39,6 +39,11 @@ class Service extends Model
         return $this->hasOne(Owner::class, "id", "owner_id");
     }
 
+    public function reservable_times()
+    {
+        return $this->hasMany(ReservableTime::class, "service_id");
+    }
+
     // レコード作成日時
     public function getCreatedAtJaAttribute()
     {

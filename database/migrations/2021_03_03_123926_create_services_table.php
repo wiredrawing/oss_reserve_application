@@ -24,8 +24,6 @@ class CreateServicesTable extends Migration
             $table->text("memo")->nullable();
             // 利用可能人数
             $table->integer("capacity")->nullable();
-            // 枠ごとの時間
-            $table->integer("price")->default(0);
             // 時間単価
             $table->integer("price_per_hour")->default(0);
             // そのサービスのタイプ 物品､部屋(ホテルなど)､人間などなど

@@ -14,16 +14,15 @@ class CreateReservableTimesTable extends Migration
     public function up()
     {
         Schema::create('reservable_times', function (Blueprint $table) {
-            $table->id();
             $table->bigInteger("service_id");
             // 予約可能な日
-            // 0 => "日曜日",
-            // 1 => "月曜日",
-            // 2 => "火曜日",
-            // 3 => "水曜日",
-            // 4 => "木曜日",
-            // 5 => "金曜日",
-            // 6 => "土曜日"
+            // 1 => "日曜日",
+            // 2 => "月曜日",
+            // 3 => "火曜日",
+            // 4 => "水曜日",
+            // 5 => "木曜日",
+            // 6 => "金曜日",
+            // 7 => "土曜日"
             $table->tinyInteger("reservable_day");
             // 予約可能開始時間
             $table->time("reservable_from");
@@ -36,15 +35,17 @@ class CreateReservableTimesTable extends Migration
             $table->timestamps();
 
             // is_enabledと同等
-            $table->tinyInteger("is_displayed")->default(1);
-            $table->tinyInteger("is_deleted")->default(0);
+            $table->tinyInteger("is_displayed")->default(Config("const.binary_type.on"));
+            $table->tinyInteger("is_deleted")->default(Config("const.binary_type.off"));
 
+            // primary
             $table->unique([
                 "service_id",
                 "reservable_day",
                 "reservable_from",
                 "reservable_to",
-            ], "reservable_times_unique");
+            ], "reservable_times_primary");
+
         });
     }
 

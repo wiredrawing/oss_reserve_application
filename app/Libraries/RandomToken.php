@@ -18,7 +18,7 @@ namespace App\Libraries {
         {
             // 生成トークンの長さがDBの指定カラムよりな長い場合はでおフォルトに
             if ($length > Config("const.max_token_length")) {
-                $length = 64;
+                $length = 128;
             }
 
             // プレフィックスが指定されている場合

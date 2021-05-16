@@ -46,6 +46,30 @@ class GuestController extends Controller
 
 
     /**
+     * 新規ゲスト情報作成APIリクエスト前のバリデーションチェック用API
+     *
+     * @param GuestRequest $request
+     * @return void
+     */
+    public function check(GuestRequest $request)
+    {
+        try {
+            $post_data = $request->validated();
+            $response = [
+                "status" => true,
+                "data" => $post_data,
+            ];
+        } catch (\Throwable $e) {
+            $response = [
+                "status" => false,
+                "data" => $e,
+            ];
+            return response()->json($response);
+        }
+    }
+
+
+    /**
      * 新規ゲスト情報を登録する
      *
      * @param GuestRequest $request
@@ -57,7 +81,7 @@ class GuestController extends Controller
             $post_data = $request->validated();
 
             // アクセス用のランダムトークンを生成
-            $token = RandomToken::MakeRandomToken(64);
+            $token = RandomToken::MakeRandomToken(128);
 
             // このランダムトークンと重複していないかをDBで調べる
             $guest = Guest::where([

@@ -38,11 +38,11 @@ class ImageRequest extends BaseRequest
 
             if ($route_name === "api.front.image.upload") {
                 $rules = [
-                    "owner_id" => [
-                        "nullable",
-                        "integer",
-                        Rule::exists("owners", "id"),
-                    ],
+                    // "owner_id" => [
+                    //     "nullable",
+                    //     "integer",
+                    //     Rule::exists("owners", "id"),
+                    // ],
                     "upload_image" => [
                         "required",
                         "image",
@@ -260,4 +260,17 @@ class ImageRequest extends BaseRequest
 
         return $rules;
     }
+
+    public function attributes()
+    {
+        return [
+            "upload_image" => "アップロード画像",
+            "name" => "アップロード画像の名前",
+            "description" => "アップロード画像の概要",
+            "owner_id" => "オーナーID",
+            "service_id" => "サービスID",
+            "token" => "トークン",
+        ];
+    }
+
 }

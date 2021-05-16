@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use App\Libraries\RandomToken;
 class OwnersTableSeeder extends Seeder
 {
     /**
@@ -20,6 +21,7 @@ class OwnersTableSeeder extends Seeder
             "description" => "description => seederから作成",
             "memo" => "memo => seederから作成",
             "administrator_id" => 1,
+            "token" => RandomToken::MakeRandomToken(128),
         ]);
     }
 }

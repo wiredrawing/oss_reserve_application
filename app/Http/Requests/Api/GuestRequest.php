@@ -36,8 +36,19 @@ class GuestRequest extends BaseRequest
 
         if ($method === "POST") {
 
-
-            if ($route_name === "api.front.guest.create") {
+            // テスト作成用のjsonデータ
+            /*
+            {
+                "family_name": "ファミリーネーム",
+                "given_name": "ギブンネーム",
+                "family_name_sort": "ファミリーネーム",
+                "given_name_sort": "ギブンネーム",
+                "email": "dummy@gmail.com",
+                "phone_number": "080-1111-2222",
+                "password": "AAAAaaa1234"
+            }
+            */
+            if ($route_name === "api.front.guest.create" || $route_name === "api.front.guest.check") {
                 $rules = [
                     "family_name" => [
                         "required",
@@ -106,11 +117,21 @@ class GuestRequest extends BaseRequest
                             }
                         },
                     ],
-                    // "token" => [
-                    //     "required",
-                    //     "string",
-                    //     Rule::exists("guests", "toke"),
-                    // ],
+                    "token" => [
+                        "required",
+                        "string",
+                        function ($attribute, $value, $fail) {
+                            $quest = Guest::where([
+                                ["is_deleted", "=", Config("const.binary_type.off")],
+                                ["token", "=", $value]
+                            ])
+                            ->get()
+                            ->first();
+                            if ($guest === NULL) {
+                                $fail("指定した{$attribute}のゲスト情報が見つかりません｡");
+                            }
+                        }
+                    ],
                     "family_name" => [
                         "required",
                         "string",

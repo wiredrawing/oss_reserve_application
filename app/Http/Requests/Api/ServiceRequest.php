@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
-
+use App\Models\Service;
 class ServiceRequest extends BaseRequest
 {
     /**
@@ -35,7 +35,42 @@ class ServiceRequest extends BaseRequest
         if ($method === "POST") {
 
             // 新規サービス登録
-            if ($route_name === "api.front.service.create") {
+            if ($route_name === "api.front.service.create" || $route_name === "api.front.service.check") {
+                /*
+                    {
+                        "service_images": [],
+                        "reservable_times": [
+                            {
+                                "reservable_day": 1,
+                                "reservable_from": "09:00",
+                                "reservable_to": "16:00",
+                                "reservable_from_hour": "09",
+                                "reservable_from_minute": "00",
+                                "reservable_to_hour": "16",
+                                "reservable_to_minute": "00",
+                                "memo": "エンドユーザー向け注意事項",
+                                "memo_for_admin": "管理者向け注意事項"
+                            },
+                            {
+                                "reservable_day": 7,
+                                "reservable_from": "09:00",
+                                "reservable_to": "16:00",
+                                "reservable_from_hour": "09",
+                                "reservable_from_minute": "00",
+                                "reservable_to_hour": "16",
+                                "reservable_to_minute": "00",
+                                "memo": "エンドユーザー向け注意事項",
+                                "memo_for_admin": "管理者向け注意事項"
+                            }
+                        ],
+                        "service_name": "サービス名",
+                        "service_type": 2,
+                        "price_per_hour": "15000",
+                        "capacity": "1",
+                        "owner_id": 9,
+                        "memo": "管理側メモ"
+                    }
+                */
                 $rules = [
                     "owner_id" => [
                         "required",
@@ -45,7 +80,18 @@ class ServiceRequest extends BaseRequest
                     "service_name" => [
                         "required",
                         "string",
-                        "between:1,512"
+                        "between:1,512",
+                        function ($attribute, $value, $fail) {
+                            $service = Service::where([
+                                ["service_name", "=", $value],
+                                ["service_type", "=", $this->input("service_type")]
+                            ])
+                            ->get()
+                            ->first();
+                            if ($service !== NULL) {
+                                $fail("既に同じサービスが登録されています｡");
+                            }
+                        }
                     ],
                     "memo" => [
                         "nullable",
@@ -57,11 +103,6 @@ class ServiceRequest extends BaseRequest
                         "required",
                         "integer",
                         "min:1",
-                    ],
-                    // 統一価格
-                    "price" => [
-                        "required",
-                        "integer",
                     ],
                     // 時間単価(時給)
                     "price_per_hour" => [
@@ -85,17 +126,19 @@ class ServiceRequest extends BaseRequest
                     "reservable_times.*.reservable_from" => [
                         // 予約可能開始時間
                         "required",
-                        Rule::in(Config("const.reservable_hours")),
+                        "date_format:H:i",
+                        // Rule::in(Config("const.reservable_hours")),
                     ],
                     "reservable_times.*.reservable_to" => [
                         // 予約可能終了時間
                         "required",
-                        Rule::in(Config("const.reservable_minutes")),
+                        "date_format:H:i",
+                        // Rule::in(Config("const.reservable_minutes")),
                     ],
                 ];
             } else if ($route_name === "api.front.service.update") {
                 $rules = [
-                    "service_id" => [
+                    "id" => [
                         "required",
                         "integer",
                         // 生存中サービスのみ
@@ -109,7 +152,20 @@ class ServiceRequest extends BaseRequest
                     "service_name" => [
                         "required",
                         "string",
-                        "between:1,512"
+                        "between:1,512",
+                        function ($attribute, $value, $fail) {
+                            // 編集中サービス以外で､同じサービス名が存在しないかどうかを検証
+                            $service = Service::where([
+                                ["service_name", "=", $value],
+                                ["id", "!=", $this->input("id")]
+                            ])
+                            ->get()
+                            ->first();
+
+                            if ($service !== NULL)  {
+                                $fail("既に同じサービスが登録されています｡");
+                            }
+                        }
                     ],
                     "memo" => [
                         "nullable",
@@ -122,11 +178,6 @@ class ServiceRequest extends BaseRequest
                         "integer",
                         "min:1",
                     ],
-                    // 統一価格
-                    "price" => [
-                        "required",
-                        "integer",
-                    ],
                     // 時間単価(時給)
                     "price_per_hour" => [
                         "required",
@@ -135,8 +186,32 @@ class ServiceRequest extends BaseRequest
                     "service_type" => [
                         "required",
                         "integer",
-                    ]
+                        Rule::in(array_column(Config("const.service_types"), "index"))
+                    ],
+                    "reservable_times" => [
+                        "required",
+                        "array",
+                    ],
+                    "reservable_times.*.reservable_day" => [
+                        "required",
+                        "integer",
+                        Rule::in(array_column(Config("const.reservable_days"), "index")),
+                    ],
+                    "reservable_times.*.reservable_from" => [
+                        // 予約可能開始時間
+                        "required",
+                        "date_format:H:i",
+                        // Rule::in(Config("const.reservable_hours")),
+                    ],
+                    "reservable_times.*.reservable_to" => [
+                        // 予約可能終了時間
+                        "required",
+                        "date_format:H:i",
+                        // Rule::in(Config("const.reservable_minutes")),
+                    ],
                 ];
+            } else if ($route_name === "api.front.service.exclude_date") {
+                // 臨時休業日の設定
             }
         } else if ($method === "GET") {
 
@@ -196,7 +271,6 @@ class ServiceRequest extends BaseRequest
             "owner_id" => "オーナー名",
             "service_name" => "サービス名",
             "service_type" => "サービスの形態･タイプなど",
-            "price" => "一括単価",
             "price_per_hour" => "時間給",
             "capacity" => "収容人数",
             "reservable_day" => "予約可能曜日",
@@ -207,34 +281,68 @@ class ServiceRequest extends BaseRequest
             "reservable_from_minute" => "-",
             "reservable_to_minute" => "-",
         ];
-        foreach ($this->input("reservable_times") as $key => $value) {
-            foreach ($value as $inner_key => $inner_value) {
-                if (isset($attributes[$inner_key])) {
-                    $attributes["reservable_times.{$key}.{$inner_key}"] = "{$key}番目の{$attributes[$inner_key]}";
+        // 予約可能時間帯が設定されている場合
+        $reservable_times = $this->input("reservable_times");
+        if (is_array($reservable_times) && count($reservable_times) > 0) {
+            foreach ($reservable_times as $key => $value) {
+                foreach ($value as $inner_key => $inner_value) {
+                    if (isset($attributes[$inner_key])) {
+                        $attributes["reservable_times.{$key}.{$inner_key}"] = "{$key}番目の{$attributes[$inner_key]}";
+                    }
                 }
             }
         }
         return $attributes;
     }
 
+    public function messages ()
+    {
+        $messages = [
+            "owner_id.required" => ":attributeは必須項目です｡",
+            "owner_id.integer" => ":attributeは数値で指定して下さい｡",
+            "owner_id.exists" => ":attributeが存在しません｡",
+            "service_name.required" => ":attributeは必須項目です｡",
+            "service_name.string" => ":attributeは1文字以上､500文字以内で入力して下さい｡",
+            "service_type.required" => ":attributeは必須項目です｡",
+            "service_type.integer" => ":attributeは数値で入力して下さい｡",
+            "price_per_hour.required" => ":attributeは必須項目です｡",
+            "capacity.required" => ":attributeは必須項目です｡",
+        ];
+
+        foreach ($this->attributes() as $key => $value) {
+            if (strpos($key, "reservable_times") !== false) {
+                $messages[$key.".required"] = ":attributeは必須項目です｡";
+            }
+        }
+
+        return $messages;
+    }
+
+
     //エラー時HTMLページにリダイレクトされないようにオーバーライド
     protected function failedValidation(Validator $validator)
     {
         $validation_errors = $validator->errors()->toArray();
+
         // 配列を階層化させたいキー
         $target_key = "reservable_times";
         $_errors = [];
-        foreach ($this->input($target_key) as $key => $value) {
-            $_errors[$target_key][$key] = [];
-            foreach ($validation_errors as $inner_key => $inner_value) {
-                $key_you_want_to_delete = $target_key.".".$key.".";
-                if (strpos($inner_key, $key_you_want_to_delete) !== false) {
-                    $extracted_key = \str_replace($key_you_want_to_delete, "", $inner_key);
-                    $_errors[$target_key][$key][$extracted_key] = $inner_value;
+        $reservable_times = $this->input($target_key);
+        if (is_array($reservable_times) && count($reservable_times) > 0) {
+            foreach ($reservable_times as $key => $value) {
+                $_errors[$target_key][$key] = [];
+                foreach ($validation_errors as $inner_key => $inner_value) {
+                    $key_you_want_to_delete = $target_key.".".$key.".";
+                    if (strpos($inner_key, $key_you_want_to_delete) !== false) {
+                        $extracted_key = \str_replace($key_you_want_to_delete, "", $inner_key);
+                        $_errors[$target_key][$key][$extracted_key] = $inner_value;
+                    }
                 }
             }
+            $validation_errors[$target_key] = $_errors[$target_key];
         }
-        $validation_errors[$target_key] = $_errors[$target_key];
+
+
         $response = [
             "status" => false,
             "data" => $validation_errors,

@@ -14,8 +14,11 @@ class Owner extends Model
         "email",
         "phone_number",
         "description",
+        "token",
         // 管理画面側メモ
         "memo",
+        "memo_for_admin",
+        "administrator_id",
     ];
 
     public function owner_images ()

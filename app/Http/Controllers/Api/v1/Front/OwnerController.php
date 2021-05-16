@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1\Front;
 
+use App\Libraries\RandomToken;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\OwnerRequest;
 use App\Models\Owner;
@@ -52,6 +53,14 @@ class OwnerController extends Controller
         try {
             $insert_data = $request->validated();
 
+            // オーナーごとの個別のユニークトークン
+            $token = RandomToken::MakeRandomToken(128);
+
+            $check_token = Owner::where("token", $token)->get()->first();
+            if ($check_token !== NULL) {
+                throw new \Exception("一意なトークン作成に失敗しました｡");
+            }
+            $insert_data["token"] = $token;
             $owner = Owner::create($insert_data);
 
             // オーナーの作成に失敗した場合

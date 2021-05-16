@@ -122,11 +122,11 @@ class ReserveRequest extends BaseRequest
                         "string",
                         "between:0,1024",
                     ],
-                    "user_token" => [
+                    "token" => [
                         "nullable",
                         "string",
                         // 仮押さえしたユーザーと同一かどうか
-                        Rule::exists("reserves", "user_token")
+                        Rule::exists("reserves", "token")
                     ]
                 ];
             } else if ($route_name === "api.front.reserve.update") {
@@ -140,7 +140,7 @@ class ReserveRequest extends BaseRequest
                         function ($attribute, $value, $fail) {
                             $reserve = Reserve::where([
                                 // セキュリティトークンがマッチすること
-                                ["user_token", "=", $this->route()->parameter("user_token")],
+                                ["token", "=", $this->route()->parameter("token")],
                                 // レンタルサービスIDがマッチしていること
                                 ["service_id", "=", $this->input("service_id")],
                                 // ゲストIDがマッチしていること
@@ -218,14 +218,14 @@ class ReserveRequest extends BaseRequest
                         "string",
                         "between:0,1024",
                     ],
-                    "user_token" => [
+                    "token" => [
                         "nullable",
                         "string",
                         // 仮押さえしたユーザーと同一かどうか
-                        Rule::exists("reserves", "user_token"),
+                        Rule::exists("reserves", "token"),
                         function ($attribute, $value, $fail) {
                             $reserve = Reserve::where("id", $this->route()->parameter("reserve_id"))
-                            ->where("user_token", $value)
+                            ->where("token", $value)
                             ->get()
                             ->first();
                             if ($reserve === NULL) {
@@ -244,7 +244,7 @@ class ReserveRequest extends BaseRequest
                         Rule::exists("reserves", "id"),
                         // function ($attribute, $value, $fail) {
                         //     $reserve = Reserve::where("id", $value)
-                        //     ->where("user_token", $this->route()->parameter("user_token"))
+                        //     ->where("token", $this->route()->parameter("token"))
                         //     ->get()
                         //     ->first();
 
@@ -254,14 +254,14 @@ class ReserveRequest extends BaseRequest
                         //     }
                         // }
                     ],
-                    // "user_token" => [
+                    // "token" => [
                     //     "required",
                     //     "string",
                     //     // 仮押さえしたユーザーと同一かどうか
-                    //     Rule::exists("reserves", "user_token"),
+                    //     Rule::exists("reserves", "token"),
                     //     function ($attribute, $value, $fail) {
                     //         $reserve = Reserve::where("id", $this->route()->parameter("reserve_id"))
-                    //         ->where("user_token", $value)
+                    //         ->where("token", $value)
                     //         ->get()
                     //         ->first();
 

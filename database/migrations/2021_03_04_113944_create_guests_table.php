@@ -24,6 +24,7 @@ class CreateGuestsTable extends Migration
             $table->string("email", 512);
             $table->string("password", 512);
             $table->string("phone_number", 512);
+            // ゲスト専用のシークレットページ表示用トークン
             $table->string("token", 512);
             // ユーザー側の使う備考欄
             $table->text("memo")->nullable();

@@ -25,11 +25,16 @@ class CreateOwnersTable extends Migration
             $table->string("phone_number", 16);
             $table->text("description")->nullable();
             $table->text("memo")->nullable();
+            $table->text("memo_for_admin")->nullable();
+            // オーナー専用ページ表示用トークン
+            $table->string("token", 512);
             // 当該オーナーを管理する管理者ID
             $table->unsignedBigInteger("administrator_id");
             $table->tinyInteger("is_displayed")->default(0);
             $table->tinyInteger("is_deleted")->default(0);
             $table->timestamps();
+
+            $table->unique("token", "owners_token_unique");
         });
     }
 
