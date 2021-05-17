@@ -127,6 +127,17 @@ class ServiceRequest extends BaseRequest
                         // 予約可能開始時間
                         "required",
                         "date_format:H:i",
+                        function ($attribute, $value, $fail) {
+                            $_time = explode(":", $value);
+                            print_r($_time);
+                            // $from_timestamp = DateTime::createFromFormat(
+                            //     "Y-m-d H:i",
+                            //     (new DateTime())->format("Y")."-".
+                            //     (new DateTime())->format("m")."-".
+                            //     (new DateTime())->format("d")." ".
+                            //     $this->input(),
+                            // );
+                        }
                         // Rule::in(Config("const.reservable_hours")),
                     ],
                     "reservable_times.*.reservable_to" => [
@@ -182,6 +193,7 @@ class ServiceRequest extends BaseRequest
                     "price_per_hour" => [
                         "required",
                         "integer",
+                        "between:1,100000"
                     ],
                     "service_type" => [
                         "required",
@@ -201,13 +213,30 @@ class ServiceRequest extends BaseRequest
                         // 予約可能開始時間
                         "required",
                         "date_format:H:i",
-                        // Rule::in(Config("const.reservable_hours")),
+                        function ($attribute, $value, $fail) {
+                            // previous
+                            $current_index = explode(".", $attribute)[1];
+                            $_time = explode(":", $value);
+                            $_hour = (int)$_time[0];
+                            $_minute = (int)$_time[1];
+                            $previous_time = $_hour * 60 + $_minute;
+
+                            // next
+                            $_time = explode(":", $this->input("reservable_times.{$current_index}.reservable_to"));
+                            $_hour = (int)$_time[0];
+                            $_minute = (int)$_time[1];
+                            $next_time = $_hour * 60 + $_minute;
+
+
+                            if ( ($next_time > $previous_time) !== true) {
+                                $fail("予約可能時間帯は開始時間～終了時間が成り立つように入力して下さい｡");
+                            }
+                        }
                     ],
                     "reservable_times.*.reservable_to" => [
                         // 予約可能終了時間
                         "required",
                         "date_format:H:i",
-                        // Rule::in(Config("const.reservable_minutes")),
                     ],
                 ];
             } else if ($route_name === "api.front.service.exclude_date") {
@@ -306,6 +335,8 @@ class ServiceRequest extends BaseRequest
             "service_type.required" => ":attributeは必須項目です｡",
             "service_type.integer" => ":attributeは数値で入力して下さい｡",
             "price_per_hour.required" => ":attributeは必須項目です｡",
+            "price_per_hour.between" => ":attributeは100,000円以下で入力して下さい｡",
+            "price_per_hour.integer" => ":attributeは数値のみで入力して下さい｡",
             "capacity.required" => ":attributeは必須項目です｡",
         ];
 
