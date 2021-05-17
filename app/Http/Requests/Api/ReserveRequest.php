@@ -10,6 +10,7 @@ use Illuminate\Contracts\Validation\Validator;
 use App\Models\Guest;
 use App\Models\Service;
 use App\Models\Reserve;
+use App\Models\ReservableTime;
 use Symfony\Component\HttpFoundation\ServerBag;
 
 class ReserveRequest extends BaseRequest
@@ -90,6 +91,50 @@ class ReserveRequest extends BaseRequest
                                 $fail("正しい予約期間を指定して下さい｡".__LINE__);
                                 return false;
                             }
+                        },
+                        function ($attribute, $value, $fail) {
+                            // サービスごとの予約可能時間内に該当するかどうかを検証
+                            $from = \DateTime::createFromFormat("Y-n-j H:i:s", $value);
+                            $from_hour = $from->format("H:i");
+                            $from_day = $from->format("N");
+
+                            $to = \DateTime::createFromFormat("Y-n-j H:i:s", $this->input("to_datetime"));
+                            $to_hour = $to->format("H:i");
+                            $to_day = $to->format("N");
+
+                            if ($from_day === $to_day) {
+                                // 開始時間のバリデーションチェック
+                                $reservable_time = ReservableTime::where([
+                                    ["reservable_day", "=", $from_day],
+                                    ["reservable_from", "<=", $from_hour],
+                                    ["reservable_to", ">=", $to_hour],
+                                ])
+                                ->get()
+                                ->first();
+                                if ($reservable_time === NULL) {
+                                    $fail("指定した時間帯は予約できません｡");
+                                }
+                            } else {
+                                $fail("日をまたぐ予約はできません｡");
+                                // // 前日の開始時間のバリデーションチェック
+                                // $prev_reservable_time = ReservableTime::where([
+                                //     ["reservable_day", "=", $from_day],
+                                //     ["reservable_from", "<=", $from_hour],
+                                //     ["reservable_to", ">=", '00:00'],
+                                // ])
+                                // ->get()
+                                // ->first();
+                                // var_dump($prev_reservable_time);
+                                // // 前日の開始時間のバリデーションチェック
+                                // $next_reservable_time = ReservableTime::where([
+                                //     ["reservable_day", "=", $to_day],
+                                //     ["reservable_from", "<=", '00:00'],
+                                //     ["reservable_to", ">=", $to_day],
+                                // ])
+                                // ->get()
+                                // ->first();
+                                // var_dump($next_reservable_time);
+                            }
                         }
                     ],
                     "to_datetime" => [
@@ -122,12 +167,12 @@ class ReserveRequest extends BaseRequest
                         "string",
                         "between:0,1024",
                     ],
-                    "token" => [
-                        "nullable",
-                        "string",
-                        // 仮押さえしたユーザーと同一かどうか
-                        Rule::exists("reserves", "token")
-                    ]
+                    // "token" => [
+                    //     "nullable",
+                    //     "string",
+                    //     // 仮押さえしたユーザーと同一かどうか
+                    //     Rule::exists("reserves", "token")
+                    // ]
                 ];
             } else if ($route_name === "api.front.reserve.update") {
 

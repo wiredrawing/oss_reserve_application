@@ -116,12 +116,12 @@ Route::group([
             "uses" => "ReserveController@between",
         ]);
         // 指定したサービスの予約情報を更新する
-        Route::post("/{reserve_id}/{user_token}/update", [
+        Route::post("/{reserve_id}/{token}/update", [
             "as" => "update",
             "uses" => "ReserveController@update",
         ]);
         // 指定したサービスの予約情報を取得する
-        Route::get("/{reserve_id}/{user_token}", [
+        Route::get("/{reserve_id}/{token}", [
             "as" => "detail",
             "uses" => "ReserveController@detail",
         ]);

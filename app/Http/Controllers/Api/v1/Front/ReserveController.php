@@ -89,7 +89,7 @@ class ReserveController extends Controller
             ])
             ->where([
                 ["is_canceled", "=", Config("const.binary_type.off")],
-                ["user_token", "=", $token],
+                ["token", "=", $token],
             ])
             ->find($reserve_id);
 

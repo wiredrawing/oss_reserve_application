@@ -39,7 +39,7 @@ class CreateReservableTimesTable extends Migration
             $table->tinyInteger("is_deleted")->default(Config("const.binary_type.off"));
 
             // primary
-            $table->unique([
+            $table->primary([
                 "service_id",
                 "reservable_day",
                 "reservable_from",

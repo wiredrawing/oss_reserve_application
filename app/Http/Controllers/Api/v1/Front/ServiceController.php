@@ -137,6 +137,7 @@ class ServiceController extends Controller
                 ["service_id", "=", $service->id]
             ])
             ->delete();
+            // 再度同サービスの予約可能時間を登録し直す
             $reservable_times = $post_data["reservable_times"];
             foreach ($reservable_times as $key => $value) {
                 $value["service_id"] = $service->id;
@@ -145,7 +146,6 @@ class ServiceController extends Controller
                     throw new \Exception("予約可能時間の登録に失敗しました｡");
                 }
             }
-
 
             DB::commit();
             $response = [

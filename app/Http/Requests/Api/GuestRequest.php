@@ -81,11 +81,11 @@ class GuestRequest extends BaseRequest
                             }
                         }
                     ],
-                    "password" => [
-                        "required",
-                        "string",
-                        "between:10,72"
-                    ],
+                    // "password" => [
+                    //     "required",
+                    //     "string",
+                    //     "between:10,72"
+                    // ],
                     "phone_number" => [
                         "required",
                         new PhoneNumber(),
@@ -212,5 +212,20 @@ class GuestRequest extends BaseRequest
         }
 
         return $rules;
+    }
+
+    public function attributes()
+    {
+        return [
+            "family_name" => "名字",
+            "given_name" => "名前",
+            "family_name_sort" => "名字 ひらがな",
+            "given_name_sort" => "名前 ひらがな",
+            "email" => "メールアドレス",
+            "password" => "パスワード",
+            "phone_number" => "電話番号",
+            "memo" => "メモ",
+            "memo_for_admin" => "管理側メモ",
+        ];
     }
 }

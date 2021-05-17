@@ -30,7 +30,7 @@ class Reserve extends Model
         // 仮予約期間
         "expired_at",
         // ユーザーの編集画面表示用
-        "user_token",
+        "token",
     ];
 
     protected $appends = [
@@ -133,13 +133,13 @@ class Reserve extends Model
 
             // エンドユーザーの編集用トークン
             $random_token = RandomToken::MakeRandomToken(64);
-            $temp = Reserve::where("user_token", $random_token)->get()->first();
+            $temp = Reserve::where("token", $random_token)->get()->first();
             if ($temp !== NULL) {
                 throw new \Exception("只今サーバーが混み合っています｡もう一度､送信して下さい｡");
             }
 
             $post_data["expired_at"] = date("Y-m-d H:i:s", time() + 60 * 30);
-            $post_data["user_token"] = $random_token;
+            $post_data["token"] = $random_token;
 
             // DBへの予約レコード問い合わせ
             $new_reservation = Reserve::create($post_data);
