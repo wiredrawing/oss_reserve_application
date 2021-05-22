@@ -50,6 +50,9 @@ class CreateReservesTable extends Migration
 
             // ユニークキー
             $table->unique("token");
+
+            // 論理削除
+            $table->softDeletes();
         });
     }
 

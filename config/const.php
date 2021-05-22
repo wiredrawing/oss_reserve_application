@@ -43,13 +43,13 @@ return [
     // 予約可能な曜日一覧
     "reservable_days" => [
         ["index" => 0, "data" => "ー"],
-        ["index" => 1, "data" => "日曜日"],
-        ["index" => 2, "data" => "月曜日"],
-        ["index" => 3, "data" => "火曜日"],
-        ["index" => 4, "data" => "水曜日"],
-        ["index" => 5, "data" => "木曜日"],
-        ["index" => 6, "data" => "金曜日"],
-        ["index" => 7, "data" => "土曜日"]
+        ["index" => 1, "data" => "月曜日"],
+        ["index" => 2, "data" => "火曜日"],
+        ["index" => 3, "data" => "水曜日"],
+        ["index" => 4, "data" => "木曜日"],
+        ["index" => 5, "data" => "金曜日"],
+        ["index" => 6, "data" => "土曜日"],
+        ["index" => 7, "data" => "日曜日"]
     ],
     "reservable_hours" => (function () {
         $hours = [];
@@ -61,10 +61,13 @@ return [
     })(),
     "reservable_minutes" => (function () {
         $hours = [];
-        $hour_range = range(0, 59, 10);
+        $hour_range = range(0, 59, 1);
         foreach ($hour_range as $key => $value) {
             $hours[] = str_pad($value, 2, 0, STR_PAD_LEFT);
         }
         return $hours;
     })(),
+
+    // 一日の秒数を取得
+    "seconds_per_day" => 60 * 60 * 24,
 ];

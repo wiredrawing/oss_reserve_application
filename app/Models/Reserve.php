@@ -5,10 +5,13 @@ namespace App\Models;
 use App\Http\Requests\Api\ReserveRequest;
 use App\Libraries\RandomToken;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
 class Reserve extends Model
 {
+
+    use SoftDeletes;
 
     protected $dates = [
         "from_datetime",

@@ -43,6 +43,8 @@ class CreateServicesTable extends Migration
                 "service_name",
                 "service_type",
             ]);
+            // 論理削除
+            $table->softDeletes();
         });
     }
 

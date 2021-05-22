@@ -24,6 +24,9 @@ class CreateImagesTable extends Migration
             $table->timestamps();
             $table->unique("token", "image_token_unique");
             $table->unique("filename", "image_filename_unique");
+
+            // 論理削除
+            $table->softDeletes();
         });
     }
 

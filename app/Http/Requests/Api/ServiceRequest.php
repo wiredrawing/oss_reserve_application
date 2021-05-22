@@ -129,7 +129,6 @@ class ServiceRequest extends BaseRequest
                         "date_format:H:i",
                         function ($attribute, $value, $fail) {
                             $_time = explode(":", $value);
-                            print_r($_time);
                             // $from_timestamp = DateTime::createFromFormat(
                             //     "Y-m-d H:i",
                             //     (new DateTime())->format("Y")."-".

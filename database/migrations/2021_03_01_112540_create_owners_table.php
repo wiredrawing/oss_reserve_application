@@ -35,6 +35,8 @@ class CreateOwnersTable extends Migration
             $table->timestamps();
 
             $table->unique("token", "owners_token_unique");
+            // 論理削除
+            $table->softDeletes();
         });
     }
 

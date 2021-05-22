@@ -40,6 +40,9 @@ class CreateGuestsTable extends Migration
 
             $table->unique("token");
             $table->unique("email");
+
+            // 論理削除
+            $table->softDeletes();
         });
     }
 

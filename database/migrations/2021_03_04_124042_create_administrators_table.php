@@ -23,6 +23,8 @@ class CreateAdministratorsTable extends Migration
             $table->text("memo");
             $table->dateTime("last_login");
             $table->timestamps();
+
+            $table->softDeletes();
         });
     }
 
