@@ -8,6 +8,7 @@ use App\Models\Guest;
 use App\Models\Service;
 use App\Models\Reserve;
 use App\Models\ReservableTime;
+use App\Rules\MyDateTime;
 
 class ReserveRequest extends BaseRequest
 {
@@ -75,90 +76,90 @@ class ReserveRequest extends BaseRequest
                         "required",
                         "string",
                         "date_format:Y-n-j H:i:s",
+                        new MyDateTime(),
                         function ($attribute, $value, $fail) {
                             // 予約開始日時のバリデーション
                             $from = \DateTime::createFromFormat("Y-n-j H:i:s", $value);
                             if ($from === false) {
-                                $fail("予約日時のフォーマットが正しくありません｡");
+                                $fail(":attributeのフォーマットが正しくありません｡");
                                 return false;
                             }
-                            $from = $from->getTimestamp();
+
+                            // // 予約開始日時の秒数は[00]秒であること
+                            // if ($from->format("s") !== "00") {
+                            //     $fail(":attributeの秒数は[00]で指定して下さい｡");
+                            // }
+
+                            // 予約開始時のタイムスタンプ
+                            $start_timestamp = $from->getTimestamp();
 
                             // 予約終了日時のバリデーション
                             $to = \DateTime::createFromFormat("Y-n-j H:i:s", $this->input("to_datetime"));
                             if ($to === false) {
-                                $fail("予約日時のフォーマットが正しくありません｡");
+                                $fail(":attributeのフォーマットが正しくありません｡");
                                 return false;
                             }
-                            $to = $to->getTimestamp();
-                            if ( ($from < $to) !== true) {
+                            // 予約終了時のタイムスタンプ
+                            $end_timestamp = $to->getTimestamp();
+                            if ( ($start_timestamp < $end_timestamp) !== true) {
                                 $fail("正しい予約期間を指定して下さい｡");
                                 return false;
                             }
-                        },
-                        function ($attribute, $value, $fail) {
-                            // サービスごとの予約可能時間内に該当するかどうかを検証
-                            $from = \DateTime::createFromFormat("Y-n-j H:i:s", $value);
-                            // タイムスタンプのバリデーションチェック
-                            if ($from === false) {
-                                $fail(":attributeが不正な値です｡");
-                                return true;
-                            }
-                            $to = \DateTime::createFromFormat("Y-n-j H:i:s", $this->input("to_datetime"));
-                            if ($to === false) {
-                                $fail(":attributeが不正な値です｡");
-                                return true;
-                            }
 
-                            $start_timestamp = $from->getTimestamp();
-                            $end_timestamp = $to->getTimestamp();
 
                             $reservation_periods = [];
-
                             for($index = $start_timestamp; $index <= $end_timestamp; $index++) {
                                 if ($index % Config("const.seconds_per_day") === 0) {
+                                    $to_timestamp = $index -1;
                                     $reservation_periods[] = [
                                         "from" => $start_timestamp,
-                                        "to" => $index - 1,
+                                        "to" => $to_timestamp,
+                                        "seconds" => $to_timestamp - $start_timestamp,
                                         "from_format" => (new \DateTime())->setTimestamp($start_timestamp)->format("Y-n-j H:i:s"),
-                                        "to_format" => (new \DateTime())->setTimestamp($index - 1)->format("Y-n-j H:i:s"),
+                                        "to_format" => (new \DateTime())->setTimestamp($to_timestamp)->format("Y-n-j H:i:s"),
                                         "reservable_from" => (new \DateTime())->setTimestamp($start_timestamp)->format("H:i"),
-                                        "reservable_to" => (new \DateTime())->setTimestamp($index - 1)->format("H:i"),
+                                        "reservable_to" => (new \DateTime())->setTimestamp($to_timestamp)->format("H:i"),
                                         "reservable_day" => (new \Datetime())->setTimestamp($start_timestamp)->format("N"),
                                     ];
                                     $start_timestamp = $index;
+                                    continue;
                                 }
                                 if ($index === $end_timestamp) {
+                                    $to_timestamp = $index -1;
                                     $reservation_periods[] = [
                                         "from" => $start_timestamp,
-                                        "to" => $index - 1,
+                                        "to" => $to_timestamp,
+                                        "seconds" => $to_timestamp - $start_timestamp,
                                         "from_format" => (new \DateTime())->setTimestamp($start_timestamp)->format("Y-n-j H:i:s"),
-                                        "to_format" => (new \DateTime())->setTimestamp($index - 1)->format("Y-n-j H:i:s"),
+                                        "to_format" => (new \DateTime())->setTimestamp($to_timestamp)->format("Y-n-j H:i:s"),
                                         "reservable_from" => (new \DateTime())->setTimestamp($start_timestamp)->format("H:i"),
-                                        "reservable_to" => (new \DateTime())->setTimestamp($index - 1)->format("H:i"),
+                                        "reservable_to" => (new \DateTime())->setTimestamp($to_timestamp)->format("H:i"),
                                         "reservable_day" => (new \Datetime())->setTimestamp($start_timestamp)->format("N"),
                                     ];
                                     $start_timestamp = $index;
                                 }
                             }
 
+                            print_r($reservation_periods);
 
-                            foreach ($reservation_periods as $key => $value) {
-                                $result = ReservableTime::where(function ($query) use ($value) {
-                                    $query->where([
+                            $result = ReservableTime::where(function ($query) use ($reservation_periods) {
+                                foreach ($reservation_periods as $key => $value) {
+                                    $query->orWhere([
                                         ["service_id", "=", $this->input("service_id")],
                                         ["reservable_from", "<=", $value["reservable_from"]],
-                                        ["reservable_to", ">=", $value["reservable_to"]],
+                                        ["reservable_to", ">", $value["reservable_to"]],
                                         ["reservable_day", "=", $value["reservable_day"]],
                                     ]);
-                                })
-                                ->get()
-                                ->first();
-
-                                if ($result === null) {
-                                    $fail("指定した期間は予約ができません｡");
-                                    return true;
                                 }
+                            })
+                            ->get();
+
+
+                            print_r($result->toArray());
+
+                            if ( ($result->count() >= count($reservation_periods)) !== true) {
+                                $fail("指定した期間は予約ができません｡");
+                                return false;
                             }
                         }
                     ],
@@ -166,18 +167,25 @@ class ReserveRequest extends BaseRequest
                         "required",
                         "string",
                         "date_format:Y-n-j H:i:s",
+                        new MyDateTime(),
                         function ($attribute, $value, $fail) {
                             // 予約開始日時のバリデーション
                             $to = \DateTime::createFromFormat("Y-n-j H:i:s", $value);
                             if ($to === false) {
-                                $fail("予約日時のフォーマットが正しくありません｡");
+                                $fail(":attributeのフォーマットが正しくありません｡");
                                 return false;
                             }
+
+                            // // 予約開始日時の秒数は[00]秒であること
+                            // if ($to->format("s") !== "59") {
+                            //     $fail(":attributeの秒数は[59]で指定して下さい｡");
+                            // }
+
                             $to = $to->getTimestamp();
                             // 予約終了日時のバリデーション
                             $from = \DateTime::createFromFormat("Y-n-j H:i:s", $this->input("from_datetime"));
                             if ($from === false) {
-                                $fail("予約日時のフォーマットが正しくありません｡");
+                                $fail(":attributeのフォーマットが正しくありません｡");
                                 return false;
                             }
                             $from = $from->getTimestamp();

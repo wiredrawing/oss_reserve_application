@@ -64,8 +64,24 @@ class ServiceController extends Controller
 
             // 予約可能時間帯を登録する
             $reservable_times = $post_data["reservable_times"];
+
             foreach ($reservable_times as $key => $value) {
                 $value["service_id"] = $service_id;
+
+                // リクエストされた設定用予約スケジュールの重複チェック
+                $already_reservable_time = ReservableTime::where([
+                    ["service_id", "=", $value["service_id"]],
+                    ["reservable_day", "=", $value["reservable_day"]],
+                    ["reservable_from", "<=", $value["reservable_to"]],
+                    ["reservable_to", ">", $value["reservable_from"]],
+                ])
+                ->get()
+                ->first();
+
+                if ($already_reservable_time !== NULL) {
+                    throw new \Exception("入力した予約可能時間帯が重複しています｡");
+                }
+
                 $reservable_time = ReservableTime::create($value);
             }
 
