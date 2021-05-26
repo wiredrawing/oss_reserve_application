@@ -53,7 +53,7 @@ return [
     ],
     "reservable_hours" => (function () {
         $hours = [];
-        $hour_range = range(0, 23);
+        $hour_range = range(0, 24);
         foreach ($hour_range as $key => $value) {
             $hours[] = str_pad($value, 2, 0, STR_PAD_LEFT);
         }
@@ -61,7 +61,7 @@ return [
     })(),
     "reservable_minutes" => (function () {
         $hours = [];
-        $hour_range = range(0, 59, 1);
+        $hour_range = range(0, 59, 10);
         foreach ($hour_range as $key => $value) {
             $hours[] = str_pad($value, 2, 0, STR_PAD_LEFT);
         }

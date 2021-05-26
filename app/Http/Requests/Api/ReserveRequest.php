@@ -75,8 +75,7 @@ class ReserveRequest extends BaseRequest
                     "from_datetime" => [
                         "required",
                         "string",
-                        "date_format:Y-n-j H:i:s",
-                        new MyDateTime(),
+                        // "date_format:Y-n-j H:i:s",
                         function ($attribute, $value, $fail) {
                             // 予約開始日時のバリデーション
                             $from = \DateTime::createFromFormat("Y-n-j H:i:s", $value);
@@ -85,13 +84,11 @@ class ReserveRequest extends BaseRequest
                                 return false;
                             }
 
-                            // // 予約開始日時の秒数は[00]秒であること
-                            // if ($from->format("s") !== "00") {
-                            //     $fail(":attributeの秒数は[00]で指定して下さい｡");
-                            // }
 
                             // 予約開始時のタイムスタンプ
                             $start_timestamp = $from->getTimestamp();
+                            // 24時を超えている場合のフォーマット
+                            $formatted_from_datetime = $from->format("Y-n-j H:i:s");
 
                             // 予約終了日時のバリデーション
                             $to = \DateTime::createFromFormat("Y-n-j H:i:s", $this->input("to_datetime"));
@@ -101,6 +98,9 @@ class ReserveRequest extends BaseRequest
                             }
                             // 予約終了時のタイムスタンプ
                             $end_timestamp = $to->getTimestamp();
+                            // 24時を超えている場合のフォーマット
+                            $formatted_to_datetime = $to->format("Y-n-j H:i:s");
+
                             if ( ($start_timestamp < $end_timestamp) !== true) {
                                 $fail("正しい予約期間を指定して下さい｡");
                                 return false;
@@ -166,8 +166,7 @@ class ReserveRequest extends BaseRequest
                     "to_datetime" => [
                         "required",
                         "string",
-                        "date_format:Y-n-j H:i:s",
-                        new MyDateTime(),
+                        // "date_format:Y-n-j H:i:s",
                         function ($attribute, $value, $fail) {
                             // 予約開始日時のバリデーション
                             $to = \DateTime::createFromFormat("Y-n-j H:i:s", $value);
@@ -357,19 +356,19 @@ class ReserveRequest extends BaseRequest
     {
         return [
             // 予約ID
-            "reserve_id.required" => "サービスID",
+            "reserve_id.required" => ":attributeは必須項目です｡",
             "reserve_id.integer" => "サービスID",
             // サービスID
-            "service_id.required" => "サービスID",
+            "service_id.required" => ":attributeは必須項目です｡",
             "service_id.integer" => "サービスID",
             // ゲストID
-            "guest_id.required" => "ゲストID",
+            "guest_id.required" => ":attributeは必須項目です｡",
             "guest_id.integer" => "ゲストID",
             // 予約期間
-            "from_datetime.required" => "予約開始時間",
+            "from_datetime.required" => ":attributeは必須項目です｡",
             "from_datetime.date_format" => "予約開始時間",
-            "to_datetime.required" => "予約終了時間",
-            "to_datetime.date_format" => "予約終了時間",
+            "to_datetime.required" => ":attributeは必須項目です｡",
+            "to_datetime.date_format" => ":attributeが正しい日付ではありません｡",
             // 認証用トークン
             "token.required" => ":attributeは必須項目です｡",
             "token.string" => ":attributeは文字列で指定して下さい｡",
