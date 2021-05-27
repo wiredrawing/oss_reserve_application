@@ -75,7 +75,6 @@ class ReserveRequest extends BaseRequest
                     "from_datetime" => [
                         "required",
                         "string",
-                        // "date_format:Y-n-j H:i:s",
                         function ($attribute, $value, $fail) {
                             // 予約開始日時のバリデーション
                             $from = \DateTime::createFromFormat("Y-n-j H:i:s", $value);
@@ -84,11 +83,11 @@ class ReserveRequest extends BaseRequest
                                 return false;
                             }
 
-
                             // 予約開始時のタイムスタンプ
                             $start_timestamp = $from->getTimestamp();
                             // 24時を超えている場合のフォーマット
                             $formatted_from_datetime = $from->format("Y-n-j H:i:s");
+                            logger()->info("予約開始時間 => {$formatted_from_datetime}");
 
                             // 予約終了日時のバリデーション
                             $to = \DateTime::createFromFormat("Y-n-j H:i:s", $this->input("to_datetime"));
@@ -96,10 +95,12 @@ class ReserveRequest extends BaseRequest
                                 $fail(":attributeのフォーマットが正しくありません｡");
                                 return false;
                             }
+
                             // 予約終了時のタイムスタンプ
                             $end_timestamp = $to->getTimestamp();
                             // 24時を超えている場合のフォーマット
                             $formatted_to_datetime = $to->format("Y-n-j H:i:s");
+                            logger()->info("予約終了時間 => {$formatted_to_datetime}");
 
                             if ( ($start_timestamp < $end_timestamp) !== true) {
                                 $fail("正しい予約期間を指定して下さい｡");
@@ -166,7 +167,6 @@ class ReserveRequest extends BaseRequest
                     "to_datetime" => [
                         "required",
                         "string",
-                        // "date_format:Y-n-j H:i:s",
                         function ($attribute, $value, $fail) {
                             // 予約開始日時のバリデーション
                             $to = \DateTime::createFromFormat("Y-n-j H:i:s", $value);

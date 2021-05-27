@@ -90,6 +90,7 @@ class ServiceRequest extends BaseRequest
                             ->first();
                             if ($service !== NULL) {
                                 $fail("既に同じサービスが登録されています｡");
+                                return false;
                             }
                         }
                     ],
@@ -123,27 +124,45 @@ class ServiceRequest extends BaseRequest
                         "integer",
                         Rule::in(array_column(Config("const.reservable_days"), "index")),
                     ],
-                    "reservable_times.*.reservable_from" => [
-                        // 予約可能開始時間
+                    // 予約開始時間
+                    "reservable_times.*.reservable_from_hour" => [
                         "required",
-                        "date_format:H:i",
+                        Rule::in(Config("const.reservable_hours")),
                         function ($attribute, $value, $fail) {
-                            $_time = explode(":", $value);
-                            // $from_timestamp = DateTime::createFromFormat(
-                            //     "Y-m-d H:i",
-                            //     (new DateTime())->format("Y")."-".
-                            //     (new DateTime())->format("m")."-".
-                            //     (new DateTime())->format("d")." ".
-                            //     $this->input(),
-                            // );
-                        }
-                        // Rule::in(Config("const.reservable_hours")),
+                            // バリデーション中のindexを保持
+                            $current_index = explode(".", $attribute)[1];
+                            $hour = $value;
+                            $minute = $this->input("reservable_times.{$current_index}.reservable_to_minute");
+                            // 24:00を超えてないことをチェックする
+                            if ($hour === "24" && $minute !== "00") {
+                                $fail(":attributeは24:00を超えることはできません｡");
+                                return false;
+                            }
+                        },
                     ],
-                    "reservable_times.*.reservable_to" => [
-                        // 予約可能終了時間
+                    "reservable_times.*.reservable_from_minute" => [
                         "required",
-                        "date_format:H:i",
-                        // Rule::in(Config("const.reservable_minutes")),
+                        Rule::in(Config("const.reservable_minutes")),
+                    ],
+                    // 予約終了時間
+                    "reservable_times.*.reservable_to_hour" => [
+                        "required",
+                        Rule::in(Config("const.reservable_hours")),
+                        function ($attribute, $value, $fail) {
+                            // バリデーション中のindexを保持
+                            $current_index = explode(".", $attribute)[1];
+                            $hour = $value;
+                            $minute = $this->input("reservable_times.{$current_index}.reservable_to_minute");
+                            // 24:00を超えてないことをチェックする
+                            if ($hour === "24" && $minute !== "00") {
+                                $fail(":attributeは24:00を超えることはできません｡");
+                                return false;
+                            }
+                        },
+                    ],
+                    "reservable_times.*.reservable_to_minute" => [
+                        "required",
+                        Rule::in(Config("const.reservable_minutes")),
                     ],
                 ];
             } else if ($route_name === "api.front.service.update") {
@@ -164,16 +183,18 @@ class ServiceRequest extends BaseRequest
                         "string",
                         "between:1,512",
                         function ($attribute, $value, $fail) {
+                            var_dump($this->input("id"));
+                            var_dump($this->route()->parameter("id"));
                             // 編集中サービス以外で､同じサービス名が存在しないかどうかを検証
                             $service = Service::where([
                                 ["service_name", "=", $value],
-                                ["id", "!=", $this->input("id")]
+                                ["id", "<>", $this->input("id")]
                             ])
                             ->get()
                             ->first();
-
                             if ($service !== NULL)  {
                                 $fail("既に同じサービスが登録されています｡");
+                                return false;
                             }
                         }
                     ],
@@ -208,34 +229,51 @@ class ServiceRequest extends BaseRequest
                         "integer",
                         Rule::in(array_column(Config("const.reservable_days"), "index")),
                     ],
+                    // 予約開始時間のバリデーション
                     "reservable_times.*.reservable_from" => [
-                        // 予約可能開始時間
                         "required",
-                        "date_format:H:i",
-                        function ($attribute, $value, $fail) {
-                            // previous
-                            $current_index = explode(".", $attribute)[1];
-                            $_time = explode(":", $value);
-                            $_hour = (int)$_time[0];
-                            $_minute = (int)$_time[1];
-                            $previous_time = $_hour * 60 + $_minute;
-
-                            // next
-                            $_time = explode(":", $this->input("reservable_times.{$current_index}.reservable_to"));
-                            $_hour = (int)$_time[0];
-                            $_minute = (int)$_time[1];
-                            $next_time = $_hour * 60 + $_minute;
-
-
-                            if ( ($next_time > $previous_time) !== true) {
-                                $fail("予約可能時間帯は開始時間～終了時間が成り立つように入力して下さい｡");
-                            }
-                        }
                     ],
-                    "reservable_times.*.reservable_to" => [
-                        // 予約可能終了時間
+                    "reservable_times.*.reservable_from_hour" => [
                         "required",
-                        "date_format:H:i",
+                        Rule::in(Config("const.reservable_hours")),
+                        function ($attribute, $value, $fail) {
+                            // バリデーション中のindexを保持
+                            $current_index = explode(".", $attribute)[1];
+                            $hour = $value;
+                            $minute = $this->input("reservable_times.{$current_index}.reservable_from_minute");
+                            // 24:00を超えてないことをチェックする
+                            if ($hour === "24" && $minute !== "00") {
+                                $fail(":attributeは24:00を超えることはできません｡");
+                                return false;
+                            }
+                        },
+                    ],
+                    "reservable_times.*.reservable_from_minute" => [
+                        "required",
+                        Rule::in(Config("const.reservable_minutes")),
+                    ],
+                    // 予約終了時間のバリデーション
+                    "reservable_times.*.reservable_to" => [
+                        "required",
+                    ],
+                    "reservable_times.*.reservable_to_hour" => [
+                        "required",
+                        Rule::in(Config("const.reservable_hours")),
+                        function ($attribute, $value, $fail) {
+                            // バリデーション中のindexを保持
+                            $current_index = explode(".", $attribute)[1];
+                            $hour = $value;
+                            $minute = $this->input("reservable_times.{$current_index}.reservable_to_minute");
+                            // 24:00を超えてないことをチェックする
+                            if ($hour === "24" && $minute !== "00") {
+                                $fail(":attributeは24:00を超えることはできません｡");
+                                return false;
+                            }
+                        },
+                    ],
+                    "reservable_times.*.reservable_to_minute" => [
+                        "required",
+                        Rule::in(Config("const.reservable_minutes")),
                     ],
                 ];
             } else if ($route_name === "api.front.service.exclude_date") {
@@ -302,12 +340,14 @@ class ServiceRequest extends BaseRequest
             "price_per_hour" => "時間給",
             "capacity" => "収容人数",
             "reservable_day" => "予約可能曜日",
+            // 予約開始時間
             "reservable_from" => "指定曜日に可能な予約開始時間",
+            "reservable_from_hour" => "指定曜日に可能な予約開始時間",
+            "reservable_from_minute" => "指定曜日に可能な予約開始時間",
+            // 予約終了時間
             "reservable_to" => "指定曜日に可能な予約終了時間",
-            "reservable_from_hour" => "-",
-            "reservable_to_hour" => "-",
-            "reservable_from_minute" => "-",
-            "reservable_to_minute" => "-",
+            "reservable_to_hour" => "指定曜日に可能な予約終了時間",
+            "reservable_to_minute" => "指定曜日に可能な予約終了時間",
         ];
         // 予約可能時間帯が設定されている場合
         $reservable_times = $this->input("reservable_times");
@@ -326,17 +366,17 @@ class ServiceRequest extends BaseRequest
     public function messages ()
     {
         $messages = [
-            "owner_id.required" => ":attributeは必須項目です｡",
-            "owner_id.integer" => ":attributeは数値で指定して下さい｡",
-            "owner_id.exists" => ":attributeが存在しません｡",
-            "service_name.required" => ":attributeは必須項目です｡",
-            "service_name.string" => ":attributeは1文字以上､500文字以内で入力して下さい｡",
-            "service_type.required" => ":attributeは必須項目です｡",
-            "service_type.integer" => ":attributeは数値で入力して下さい｡",
+            "owner_id.required"       => ":attributeは必須項目です｡",
+            "owner_id.integer"        => ":attributeは数値で指定して下さい｡",
+            "owner_id.exists"         => ":attributeが存在しません｡",
+            "service_name.required"   => ":attributeは必須項目です｡",
+            "service_name.string"     => ":attributeは1文字以上､500文字以内で入力して下さい｡",
+            "service_type.required"   => ":attributeは必須項目です｡",
+            "service_type.integer"    => ":attributeは数値で入力して下さい｡",
             "price_per_hour.required" => ":attributeは必須項目です｡",
-            "price_per_hour.between" => ":attributeは100,000円以下で入力して下さい｡",
-            "price_per_hour.integer" => ":attributeは数値のみで入力して下さい｡",
-            "capacity.required" => ":attributeは必須項目です｡",
+            "price_per_hour.between"  => ":attributeは100,000円以下で入力して下さい｡",
+            "price_per_hour.integer"  => ":attributeは数値のみで入力して下さい｡",
+            "capacity.required"       => ":attributeは必須項目です｡",
         ];
 
         foreach ($this->attributes() as $key => $value) {
